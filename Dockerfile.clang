@@ -1,0 +1,31 @@
+#
+# NOTE: leet-server needs at least clang 12 to build (for coroutines support)
+# since it hasn't been released yet, alpine is shipping clang 11,
+# so building this will always fail until 12 is packaged
+#
+
+FROM alpine:edge
+
+# install required programs
+RUN apk add --update-cache boost boost-dev cmake clang lld musl-dev ninja
+
+# create dir
+WORKDIR /leet
+
+# get source code
+COPY external ./external
+COPY headers ./headers
+COPY sources ./sources
+COPY tests ./tests
+COPY CMakeLists.txt ./ 
+
+# setup build instructions
+RUN mkdir build \
+    && cd ./build \
+    && cmake -G Ninja -DCMAKE_CXX_COMPILER=clang -DCMAKE_LINKER=lld -DCMAKE_CXX_FLAGS="-m64" -DCMAKE_BUILD_TYPE=Release -DLEET_BUILD_TESTS=OFF ../
+
+# build the server
+RUN cd ./build \
+    && ninja
+
+CMD [ "/leet/build/leet-server", "--interface", "eth0" ]

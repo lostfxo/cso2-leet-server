@@ -1,0 +1,5 @@
+/build*
+/packets
+.cache
+*.log
+launch.json

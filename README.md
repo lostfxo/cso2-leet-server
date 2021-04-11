@@ -1,5 +1,7 @@
 # cso2-leet-server
 
+[![builds.sr.ht status](https://builds.sr.ht/~leite/cso2-leet-server/commits/alpine-gcc.yml.svg)](https://builds.sr.ht/~leite/cso2-leet-server/commits/alpine-gcc.yml)
+
 A master server for Nexon's Counter-Strike: Online 2 written in C++.
 
 The server was rewritten from [cso2-master-server](https://github.com/L-Leite/cso2-master-server).

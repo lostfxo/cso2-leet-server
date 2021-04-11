@@ -1,0 +1,22 @@
+image: alpine/edge
+packages:
+  - boost
+  - boost-dev
+  - cmake
+  - g++
+  - musl-dev
+  - ninja
+sources:
+  - https://git.sr.ht/~leite/cso2-leet-server
+tasks:
+  - setup: |
+      cd cso2-leet-server
+      mkdir build
+      cd build
+      cmake -G "Ninja" -DCMAKE_CXX_COMPILER=g++ -DLEET_BUILD_TESTS=OFF ../
+  - build: |
+      cd cso2-leet-server
+      cd build
+      ninja
+artifacts:
+  - cso2-leet-server/build/leet-server

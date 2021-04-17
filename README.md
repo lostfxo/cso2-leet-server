@@ -10,12 +10,12 @@ The server was rewritten from [cso2-master-server](https://github.com/L-Leite/cs
 
 In order to work properly, the master server requires [this user service](https://github.com/L-Leite/cso2-users-service) to be up and running somewhere reachable.
 
-You may start the server by running the `leet-server [options]` executable.
+You may start the server by running the `leet-server` executable.
 
 Example:
 
 ```
-./leet-server -i 123.45.67.89 -p 55555
+USERSERVICE_HOST=0.0.0.0 USERSERVICE_PORT=12345 ./leet-server -i 123.45.67.89 -p 55555
 ```
 
 #### Command line arguments
@@ -24,9 +24,12 @@ Example:
 - `-i, --ip-address [ip]` (_optional_) The IP address to listen on (default: 0.0.0.0)
 - `-p, --port-master [port]` (_optional_) The server's (TCP) port (default: 30001)
 - `-P, --port-holepunch [port]` (_optional_) The server's holepunch (UDP) port (default: 30002)
-- `--usersvc-host` (_optional_) The hostname of an user service (default: 127.0.0.1)
-- `--usersvc-port` (_optional_) The port number of an user service (default: 30100)
 - `-L, --log-packets` (_optional_) Log the incoming and outgoing packets
+
+### Environment variables
+
+- `USERSERVICE_HOST` (_optional_) The hostname of an user service (default: 127.0.0.1)
+- `USERSERVICE_PORT` (_optional_) The port number of an user service (default: 30100)
 
 ## Building
 
@@ -40,7 +43,21 @@ Before building cso2-leet-server, you must have:
 
 ### Building with ninja
 
-If you wish to build with ninja,
+To build with ninja, prepare the build files with:
+
+```
+mkdir ./build
+cd ./build
+cmake -G Ninja ../
+```
+
+Then build the leet-server itself with:
+
+```
+ninja
+```
+
+If successful, you will find the `leet-server` executable under the `build` directory.
 
 ### Building with Docker
 
@@ -55,6 +72,13 @@ You can then start an instance with
 ```
 docker run leet-server
 ```
+
+## Libraries used
+
+- [Boost](https://www.boost.org/)
+- [Catch2](https://github.com/catchorg/Catch2)
+- [fmt](https://github.com/fmtlib/fmt)
+- [gsl-lite](https://github.com/gsl-lite/gsl-lite)
 
 ## License
 

@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <iostream>
 #include <string_view>
 #include <thread>
@@ -95,23 +96,28 @@ ServerOptions GetCmdOptions(const CmdParser& cmd)
             "The UDP (holepunch) port number is invalid.");
     }
 
-    std::string_view userSvcHost = DEFAULT_USERSVC_ADDRESS;
+    std::string_view userSvcHost;
+    auto userSvcHostPtr = std::getenv("USERSERVICE_HOST");
 
-    if (cmd.HasOption("--usersvc-host") == true)
+    if (userSvcHostPtr != nullptr)
     {
-        userSvcHost = cmd.GetOption("--usersvc-host");
+        userSvcHost = userSvcHostPtr;
+    }
+    else
+    {
+        userSvcHost = DEFAULT_USERSVC_ADDRESS;
     }
 
-    std::uint16_t userSvcPort = DEFAULT_USERSVC_PORT;
+    std::uint16_t userSvcPort;
+    auto userSvcPortPtr = std::getenv("USERSERVICE_PORT");
 
-    if (cmd.HasOption("--usersvc-port") == true)
+    if (userSvcPortPtr != nullptr)
     {
-        userSvcPort = cmd.GetUintOption("--usersvc-port");
+        userSvcPort = std::stoul(userSvcPortPtr);
     }
-
-    if (userSvcPort == 0)
+    else
     {
-        throw std::invalid_argument("The user service port number is invalid.");
+        userSvcPort = DEFAULT_USERSVC_PORT;
     }
 
     bool shouldLogPackets =

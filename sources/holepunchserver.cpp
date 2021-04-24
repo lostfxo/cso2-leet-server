@@ -2,12 +2,13 @@
 
 #include <boost/asio/buffer.hpp>
 #include <boost/asio/co_spawn.hpp>
+#include <boost/asio/detached.hpp>
+#include <boost/asio/ip/address.hpp>
 #include <boost/asio/use_awaitable.hpp>
 #include <boost/asio/write.hpp>
 
 #include "activesessions.hpp"
 #include "clientsession.hpp"
-#include "generic/pingable.hpp"
 #include "holepunch/inpacket.hpp"
 #include "holepunch/outpacket.hpp"
 #include "util/log.hpp"
@@ -39,7 +40,7 @@ awaitable<void> HolepunchServer::AsyncOnReceive()
     {
         for (;;)
         {
-            auto bytesReceived = co_await this->m_Socket.async_receive_from(
+            co_await this->m_Socket.async_receive_from(
                 asio::buffer(this->m_CurBuffer), this->m_CurEndpoint,
                 use_awaitable);
 
@@ -74,30 +75,27 @@ awaitable<void> HolepunchServer::ParsePacket()
         }
 
         const auto externalIp = session->GetExternalAddress();
-        const auto curEndpointIp =
-            this->m_CurEndpoint.address().to_v4().to_uint();
 
-        if (externalIp != curEndpointIp)
+        if (externalIp != this->m_CurEndpoint.address().to_v4().to_uint())
         {
-            Log::Warning(
-                "IP address from session is different from holepunch '{}'"
-                "packet origin, is someone spoofing packets?\n",
-                curEndpointIp);
+            Log::Warning("IP address from session is different from holepunch "
+                         "'{}' packet origin, is someone spoofing packets?\n",
+                         this->m_CurEndpoint.address().to_string());
             co_return;
         }
 
-        auto [wasUpdated, updatedPortId] = session->UpdateHolepunch(
-            pkt.m_IpAddress, externalIp, HolepunchType(pkt.m_PortId),
-            pkt.m_PortNum, this->m_CurEndpoint.port());
+        auto wasUpdated =
+            session->UpdateHolepunch(pkt.m_IpAddress, externalIp, pkt.m_PortNum,
+                                     this->m_CurEndpoint.port(), pkt.m_PortId);
 
         if (wasUpdated == false)
         {
             Log::Warning("'{}' used an unknown holepunch port\n",
-                         curEndpointIp);
+                         this->m_CurEndpoint.address().to_string());
             co_return;
         }
 
-        auto outPkt = HolepunchOutPacket(updatedPortId);
+        auto outPkt = HolepunchOutPacket(pkt.m_PortId);
         auto bufView = outPkt.GetDataView();
 
         co_await this->m_Socket.async_send_to(

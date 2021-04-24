@@ -137,10 +137,9 @@ public:
         this->m_CurRoom = room;
     }
 
-    std::pair<bool, std::uint16_t> UpdateHolepunch(
-        std::uint32_t internalIp, std::uint32_t externalIp,
-        HolepunchType portId, std::uint16_t localPort,
-        std::uint16_t externalPort) noexcept;
+    bool UpdateHolepunch(std::uint32_t internalIp, std::uint32_t externalIp,
+                         std::uint16_t localPort, std::uint16_t externalPort,
+                         HolepunchPortId portId) noexcept;
 
 protected:
     awaitable<std::uint64_t> ProcessData(

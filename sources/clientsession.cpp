@@ -257,28 +257,50 @@ void ClientSession::Stop(const std::exception& exception) noexcept
                  exception.what());
 }
 
-std::pair<bool, std::uint16_t> ClientSession::UpdateHolepunch(
-    std::uint32_t internalIp, std::uint32_t externalIp, HolepunchType portId,
-    std::uint16_t localPort, std::uint16_t externalPort) noexcept
+/*bool ClientSession::ShouldUpdatePorts(HolepunchPortId portId,
+                                      std::uint16_t localPort,
+                                      std::uint16_t remotePort) const noexcept
+{
+    switch (portId)
+    {
+        case HolepunchPortId::Client:
+            return localPort != this->m_InternalNetInfo.ClientPort &&
+                   remotePort != this->m_ExternalNetInfo.ClientPort;
+        case HolepunchPortId::Server:
+            return localPort != this->m_InternalNetInfo.ServerPort &&
+                   remotePort != this->m_ExternalNetInfo.ServerPort;
+        case HolepunchPortId::SourceTV:
+            return localPort != this->m_InternalNetInfo.SourceTvPort &&
+                   remotePort != this->m_ExternalNetInfo.SourceTvPort;
+    }
+
+    return false;
+}*/
+
+bool ClientSession::UpdateHolepunch(std::uint32_t internalIp,
+                                    std::uint32_t externalIp,
+                                    std::uint16_t localPort,
+                                    std::uint16_t externalPort,
+                                    HolepunchPortId portId) noexcept
 {
     this->m_InternalNetInfo.IpAddress = internalIp;
     this->m_ExternalNetInfo.IpAddress = externalIp;
 
     switch (portId)
     {
-        case HolepunchType::Client:
+        case HolepunchPortId::Client:
             this->m_InternalNetInfo.ClientPort = localPort;
             this->m_ExternalNetInfo.ClientPort = externalPort;
-            return { true, 0 };
-        case HolepunchType::Server:
+            return true;
+        case HolepunchPortId::Server:
             this->m_InternalNetInfo.ServerPort = localPort;
             this->m_ExternalNetInfo.ServerPort = externalPort;
-            return { true, 1 };
-        case HolepunchType::SourceTV:
+            return true;
+        case HolepunchPortId::SourceTV:
             this->m_InternalNetInfo.SourceTvPort = localPort;
             this->m_ExternalNetInfo.SourceTvPort = externalPort;
-            return { true, 2 };
+            return true;
         default:
-            return { false, 0 };
+            return false;
     }
 }

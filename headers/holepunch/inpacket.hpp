@@ -2,6 +2,7 @@
 #define __HOLEPUNCH_INPACKET_H_
 
 #include "buffer/view.hpp"
+#include "holepunch/shared.hpp"
 
 class HolepunchInPacket : public BufferView
 {
@@ -10,16 +11,17 @@ public:
 
     [[nodiscard]] inline bool IsHeartbeat() const noexcept
     {
-        return this->GetDataViewSize() == 6;
+        return this->m_Type > HolepunchPacketType::Punch;
     }
 
     // these members are memory aligned
     std::uint32_t m_UserId;
     std::uint32_t m_IpAddress;
-    std::uint16_t m_PortId;
     std::uint16_t m_PortNum;
 
     std::uint8_t m_Signature;
+    HolepunchPacketType m_Type;
+    HolepunchPortId m_PortId;
 };
 
 #endif  // __HOLEPUNCH_INPACKET_H_

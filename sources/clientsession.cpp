@@ -257,26 +257,6 @@ void ClientSession::Stop(const std::exception& exception) noexcept
                  exception.what());
 }
 
-/*bool ClientSession::ShouldUpdatePorts(HolepunchPortId portId,
-                                      std::uint16_t localPort,
-                                      std::uint16_t remotePort) const noexcept
-{
-    switch (portId)
-    {
-        case HolepunchPortId::Client:
-            return localPort != this->m_InternalNetInfo.ClientPort &&
-                   remotePort != this->m_ExternalNetInfo.ClientPort;
-        case HolepunchPortId::Server:
-            return localPort != this->m_InternalNetInfo.ServerPort &&
-                   remotePort != this->m_ExternalNetInfo.ServerPort;
-        case HolepunchPortId::SourceTV:
-            return localPort != this->m_InternalNetInfo.SourceTvPort &&
-                   remotePort != this->m_ExternalNetInfo.SourceTvPort;
-    }
-
-    return false;
-}*/
-
 bool ClientSession::UpdateHolepunch(std::uint32_t internalIp,
                                     std::uint32_t externalIp,
                                     std::uint16_t localPort,

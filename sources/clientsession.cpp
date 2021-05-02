@@ -253,6 +253,12 @@ void ClientSession::LogPacketData(const std::span<const std::uint8_t> data)
 void ClientSession::Stop(const std::exception& exception) noexcept
 {
     this->m_WriteTimer.cancel();
+
+    if (this->m_CurChannel != nullptr)
+    {
+        this->m_CurChannel->RemoveSessionFromChannel(shared_from_this());
+    }
+
     Log::Warning("[ClientSession::Stop] session stopped with reason: {}\n",
                  exception.what());
 }

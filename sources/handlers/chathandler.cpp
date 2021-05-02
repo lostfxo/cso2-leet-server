@@ -138,9 +138,9 @@ void OnChatIngameGlobalMsgRequest(const InChatPacket& chatPkt,
         chatPkt.Message, sessionUser->GetUserName(), sessionUser->GetVipLevel(),
         sessionUser->IsGameMaster());
 
-    for (const auto& slot : curRoom->GetSlots())
+    for (auto slot : curRoom->GetSlots())
     {
-        slot.GetSession()->Send(std::move(msgPkt));
+        slot->GetSession()->Send(std::move(msgPkt));
     }
 }
 
@@ -174,11 +174,11 @@ void OnChatIngameTeamMsgRequest(const InChatPacket& chatPkt,
         chatPkt.Message, sessionUser->GetUserName(), sessionUser->GetVipLevel(),
         sessionUser->IsGameMaster());
 
-    for (const auto& slot : curRoom->GetSlots())
+    for (auto slot : curRoom->GetSlots())
     {
-        if (slot.GetTeam() == sessionSlot->GetTeam())
+        if (slot->GetTeam() == sessionSlot->GetTeam())
         {
-            slot.GetSession()->Send(std::move(msgPkt));
+            slot->GetSession()->Send(std::move(msgPkt));
         }
     }
 }

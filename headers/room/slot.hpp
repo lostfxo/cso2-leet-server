@@ -34,9 +34,15 @@ public:
         return this->m_CachedUserId;
     }
 
-    [[nodiscard]] std::uint32_t GetKills() const noexcept { return this->m_Kills; }
+    [[nodiscard]] std::uint32_t GetKills() const noexcept
+    {
+        return this->m_Kills;
+    }
 
-    [[nodiscard]] std::uint32_t GetDeaths() const noexcept { return this->m_Deaths; }
+    [[nodiscard]] std::uint32_t GetDeaths() const noexcept
+    {
+        return this->m_Deaths;
+    }
 
     [[nodiscard]] std::uint32_t GetAssists() const noexcept
     {
@@ -55,9 +61,15 @@ public:
         this->m_Status = newStatus;
     }
 
-    void AddKills(std::uint32_t numKills) noexcept { this->m_Kills += numKills; }
+    void AddKills(std::uint32_t numKills) noexcept
+    {
+        this->m_Kills += numKills;
+    }
 
-    void AddDeaths(std::uint32_t numDeaths) noexcept { this->m_Deaths += numDeaths; }
+    void AddDeaths(std::uint32_t numDeaths) noexcept
+    {
+        this->m_Deaths += numDeaths;
+    }
 
     void AddAssists(std::uint32_t numAssists) noexcept
     {

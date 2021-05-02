@@ -47,5 +47,6 @@ struct NewRoomRequestOptions
 
 using RoomPtr = std::shared_ptr<Room>;
 using RoomList = std::list<RoomPtr>;
+using SlotPtr = std::shared_ptr<Slot>;
 
 #endif  // __ROOM_SHARED_H_

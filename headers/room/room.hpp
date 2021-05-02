@@ -2,12 +2,14 @@
 #define __ROOM_ROOM_H_
 
 #include <algorithm>
+#include <atomic>
 #include <cstdint>
 #include <functional>
 
 #include <boost/asio/awaitable.hpp>
 
 #include "cso2/shared.hpp"
+#include "holepunchserver.hpp"
 #include "room/match.hpp"
 #include "room/settings.hpp"
 #include "room/shared.hpp"
@@ -28,8 +30,9 @@ public:
 
     [[nodiscard]] std::uint32_t GetId() const noexcept { return this->m_Id; }
 
-    [[nodiscard]] auto GetHostSlot() noexcept { return this->m_Host; }
     [[nodiscard]] std::uint32_t GetHostUserId() const noexcept;
+    [[nodiscard]] std::string_view GetHostPlayerName() const noexcept;
+    [[nodiscard]] std::uint8_t GetHostVipLevel() const noexcept;
 
     void Join(ClientSessionPtr session);
     void RemoveSlotById(std::uint32_t userId);
@@ -66,8 +69,9 @@ public:
         return this->m_Slots;
     }
 
-    [[nodiscard]] Slot* FindSlotById(std::uint32_t userId) noexcept;
-    [[nodiscard]] const Slot* FindSlotById(std::uint32_t userId) const noexcept;
+    [[nodiscard]] SlotPtr FindSlotById(std::uint32_t userId) noexcept;
+    [[nodiscard]] const SlotPtr FindSlotById(
+        std::uint32_t userId) const noexcept;
 
     [[nodiscard]] bool IsUserInRoom(std::uint32_t userId) const;
 
@@ -107,29 +111,31 @@ public:
     void AddEmptyListener(EmptyCallback_t&& listener);
 
 protected:
-    Slot* ReserveSlot(ClientSessionPtr session);
-    void SetHost(Slot& newHost);
+    SlotPtr ReserveSlot(ClientSessionPtr session);
+    void SetHost(SlotPtr newHost);
 
     [[nodiscard]] cso2::TeamNum FindDesirableTeamNum() const noexcept;
 
     void SetStatus(RoomStatus newStatus);
     void ResetIngameUsersReadyStatus();
 
-    void SendJoinRoom(const Slot& sourceSlot) const;
-    void SendRoomSettings(const Slot& sourceSlot) const;
-    void SendTeamChangeGlobal(const Slot& sourceSlot, cso2::TeamNum newTeamNum);
-    void SendRoomStatusTo(const Slot& sourceSlot) const;
-    void SendUserReadyStatusTo(const Slot& receivingSlot,
-                               const Slot& sourceSlot) const;
-    void SendAllUserStatusTo(const Slot& userSlot) const;
-    void SendHostConnDataTo(const Slot& slot) const;
-    void SendGuestConnDataToHost(const Slot& slot) const;
-    void SendGameEndTo(const Slot& slot) const;
+    void SendJoinRoom(const SlotPtr sourceSlot) const;
+    void SendRoomSettings(const SlotPtr sourceSlot) const;
+    void SendTeamChangeGlobal(const SlotPtr sourceSlot,
+                              cso2::TeamNum newTeamNum);
+    void SendRoomStatusTo(const SlotPtr sourceSlot) const;
+    void SendUserReadyStatusTo(const SlotPtr receivingSlot,
+                               const SlotPtr sourceSlot) const;
+    void SendAllUserStatusTo(const SlotPtr userSlot) const;
+    void SendHostConnDataTo(const SlotPtr slot) const;
+    void SendGuestConnDataToHost(const SlotPtr slot) const;
+    void SendGameEndTo(const SlotPtr slot) const;
 
-    void BroadcastNewUser(const Slot& newSlot) const;
+    void BroadcastNewUser(const SlotPtr newSlot) const;
     void BroadcastNewSettings() const;
-    void BroadcastUserReadyStatus(const Slot& userSlot) const;
-    void BroadcastNewUserTeam(const Slot& sourceSlot, cso2::TeamNum newTeamNum);
+    void BroadcastUserReadyStatus(const SlotPtr userSlot) const;
+    void BroadcastNewUserTeam(const SlotPtr sourceSlot,
+                              cso2::TeamNum newTeamNum);
     void BroadcastCountdown(bool shouldCountdown);
     void BroadcastAllReadyStatus() const;
 
@@ -138,8 +144,8 @@ protected:
     void TriggerEmptyEvent();
 
 private:
-    std::list<Slot> m_Slots;
-    Slot* m_Host;
+    std::list<SlotPtr> m_Slots;
+    SlotPtr m_Host;
 
     std::uint32_t m_Id;
 

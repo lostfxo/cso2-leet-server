@@ -24,13 +24,13 @@ inline void WritePlayerNetInfo(DynamicBuffer& buf, cso2::TeamNum teamNum,
     buf.Write<std::uint16_t>(session->GetInternalTvPort());
 }
 
-inline void WriteRoomSlot(DynamicBuffer& buf, const Slot& s)
+inline void WriteRoomSlot(DynamicBuffer& buf, const SlotPtr s)
 {
-    auto curSession = s.GetSession();
+    auto curSession = s->GetSession();
     auto curUser = curSession->GetUser();
 
     buf.Write<std::uint32_t>(curUser->GetId());
-    WritePlayerNetInfo(buf, s.GetTeam(), curSession);
+    WritePlayerNetInfo(buf, s->GetTeam(), curSession);
     WriteUserInfoUpdate(buf, 0xFFFFFFFF, curUser);
 }
 
@@ -221,7 +221,7 @@ PacketBuilder OutRoomPacket::CreateAndJoin(const Room& room)
 
     buf.Write(gsl::narrow<std::uint8_t>(slots.size()));  // numOfPlayers
 
-    for (const auto& s : slots)
+    for (auto s : slots)
     {
         WriteRoomSlot(buf, s);
     }
@@ -231,7 +231,7 @@ PacketBuilder OutRoomPacket::CreateAndJoin(const Room& room)
     return res;
 }
 
-PacketBuilder OutRoomPacket::PlayerJoin(const Slot& slot)
+PacketBuilder OutRoomPacket::PlayerJoin(const SlotPtr slot)
 {
     PacketBuilder res(PacketId::Room, 256);
     auto& buf = res.GetBuffer();

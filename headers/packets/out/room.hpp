@@ -21,7 +21,7 @@ class OutRoomPacket
 {
 public:
     static PacketBuilder CreateAndJoin(const Room& room);
-    static PacketBuilder PlayerJoin(const Slot& slot);
+    static PacketBuilder PlayerJoin(const SlotPtr slot);
     static PacketBuilder PlayerLeave(std::uint32_t userId);
     static PacketBuilder SetPlayerReady(std::uint32_t userId,
                                         cso2::SlotStatus status);

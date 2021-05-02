@@ -40,9 +40,6 @@ void Channel::AddSessionToChannel(ClientSessionPtr session)
 
 void Channel::RemoveSessionFromChannel(ClientSessionPtr session)
 {
-    this->m_ConnectedSessions.remove(session);
-    session->SetCurChannel(nullptr);
-
     auto curRoom = session->GetCurRoom();
 
     if (curRoom != nullptr)
@@ -50,6 +47,9 @@ void Channel::RemoveSessionFromChannel(ClientSessionPtr session)
         curRoom->RemoveSlotById(session->GetUser()->GetId());
         session->SetCurRoom(nullptr);
     }
+
+    this->m_ConnectedSessions.remove(session);
+    session->SetCurChannel(nullptr);
 }
 
 void Channel::OnRoomEmptied(RoomPtr room)

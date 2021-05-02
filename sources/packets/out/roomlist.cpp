@@ -2,8 +2,6 @@
 
 #include <gsl/gsl>
 
-#include "clientsession.hpp"
-#include "cso2/user.hpp"
 #include "room/room.hpp"
 
 enum class OutRoomListType
@@ -13,9 +11,6 @@ enum class OutRoomListType
 
 inline void WriteRoomListItem(DynamicBuffer& pktBuf, RoomPtr room)
 {
-    auto hostSlot = room->GetHostSlot();
-    auto hostUser = hostSlot->GetSession()->GetUser();
-
     pktBuf.Write(gsl::narrow<std::uint16_t>(room->GetId()));  // roomId
     pktBuf.Write<std::uint64_t>(0xFFFFFFFFFFFFFFFF);          // flags
 
@@ -54,8 +49,8 @@ inline void WriteRoomListItem(DynamicBuffer& pktBuf, RoomPtr room)
     pktBuf.Write<std::uint8_t>(0);  // unk08
     // end flags & 0x100
     // flags & 0x200
-    pktBuf.Write<std::uint32_t>(hostSlot->GetUserId());  // hostUserId
-    pktBuf.WriteString(hostUser->GetPlayerName());       // hostUserName
+    pktBuf.Write<std::uint32_t>(room->GetHostUserId());  // hostUserId
+    pktBuf.WriteString(room->GetHostPlayerName());       // hostUserName
     pktBuf.Write<std::uint8_t>(0);                       // unk11
     // end flags & 0x200
     // flags & 0x400
@@ -143,8 +138,10 @@ inline void WriteRoomListItem(DynamicBuffer& pktBuf, RoomPtr room)
     pktBuf.Write<std::uint8_t>(0);  // canSpec
     // end flags & 0x20000000
     // flags & 0x40000000
-    pktBuf.Write<std::uint8_t>(hostUser->GetVipLevel() > 0);  // isVipRoom
-    pktBuf.Write<std::uint8_t>(hostUser->GetVipLevel());      // vipRoomLevel
+    auto hostVipLevel = room->GetHostVipLevel();
+
+    pktBuf.Write<std::uint8_t>(hostVipLevel > 0);  // isVipRoom
+    pktBuf.Write<std::uint8_t>(hostVipLevel);      // vipRoomLevel
     // end flags & 0x40000000
     // flags & 0x80000000
     pktBuf.Write<std::uint8_t>(

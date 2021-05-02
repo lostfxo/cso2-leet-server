@@ -23,8 +23,8 @@ Room::Room(std::uint32_t roomId, NewRoomRequestOptions& options,
       m_CountingDown(false)
 {
     this->m_Host = this->ReserveSlot(host);
-    this->SendJoinRoom(*this->m_Host);
-    this->SendRoomSettings(*this->m_Host);
+    this->SendJoinRoom(this->m_Host);
+    this->SendRoomSettings(this->m_Host);
 }
 
 Room::~Room()
@@ -37,35 +37,51 @@ std::uint32_t Room::GetHostUserId() const noexcept
     return this->m_Host->GetUserId();
 }
 
+std::string_view Room::GetHostPlayerName() const noexcept
+{
+    return this->m_Host->GetSession()->GetUser()->GetPlayerName();
+}
+
+std::uint8_t Room::GetHostVipLevel() const noexcept
+{
+    return this->m_Host->GetSession()->GetUser()->GetVipLevel();
+}
+
 void Room::Join(ClientSessionPtr session)
 {
     auto newSlot = this->ReserveSlot(session);
-    this->SendJoinRoom(*newSlot);
-    this->SendRoomSettings(*newSlot);
-    this->SendAllUserStatusTo(*newSlot);
-    this->BroadcastNewUser(*newSlot);
+    this->SendJoinRoom(newSlot);
+    this->SendRoomSettings(newSlot);
+    this->SendAllUserStatusTo(newSlot);
+    this->BroadcastNewUser(newSlot);
 }
 
 void Room::RemoveSlotById(std::uint32_t userId)
 {
     bool hostDeleted = userId == this->GetHostUserId();
 
+    if (hostDeleted == true && this->m_Slots.size() > 1)
+    {
+        auto newHost = this->m_Slots.front();
+
+        if (newHost->GetUserId() == userId)
+        {
+            newHost = this->m_Slots.back();
+        }
+
+        Log::Debug("[Room::RemoveSlotById] host removed from the room, setting "
+                   "user {} as the new host\n",
+                   newHost->GetUserId());
+        this->SetHost(newHost);
+    }
+
     this->m_Slots.remove_if(
-        [userId](const Slot& s) { return s.GetUserId() == userId; });
+        [userId](const SlotPtr s) { return s->GetUserId() == userId; });
 
     if (this->m_Slots.empty() == true)
     {
         this->TriggerEmptyEvent();
         return;
-    }
-
-    if (hostDeleted == true)
-    {
-        auto newHost = this->m_Slots.front();
-        Log::Debug("[Room::RemoveSlotById] host removed from the room, setting "
-                   "user {} as the new host\n",
-                   newHost.GetUserId());
-        this->SetHost(newHost);
     }
 }
 
@@ -87,28 +103,28 @@ void Room::RemoveSlotById(std::uint32_t userId)
 
 [[nodiscard]] std::size_t Room::GetNumOfReadyHumanPlayers() const noexcept
 {
-    return ranges::count_if(this->m_Slots, [this](const auto& s) {
-        return s.GetStatus() == cso2::SlotStatus::Ready || s == *this->m_Host;
+    return ranges::count_if(this->m_Slots, [this](auto s) {
+        return s->GetStatus() == cso2::SlotStatus::Ready || s == this->m_Host;
     });
 }
 
 [[nodiscard]] std::size_t Room::GetNumOfHumanCts() const noexcept
 {
-    return ranges::count_if(this->m_Slots, [](const auto& s) {
-        return s.GetTeam() == cso2::TeamNum::CounterTerrorist;
+    return ranges::count_if(this->m_Slots, [](auto s) {
+        return s->GetTeam() == cso2::TeamNum::CounterTerrorist;
     });
 }
 
 [[nodiscard]] std::size_t Room::GetNumOfHumanTerrorists() const noexcept
 {
-    return ranges::count_if(this->m_Slots, [](const auto& s) {
-        return s.GetTeam() == cso2::TeamNum::Terrorist;
+    return ranges::count_if(this->m_Slots, [](auto s) {
+        return s->GetTeam() == cso2::TeamNum::Terrorist;
     });
 }
 
 [[nodiscard]] bool Room::IsUserReady(std::uint32_t userId) const noexcept
 {
-    const auto* slot = this->FindSlotById(userId);
+    const auto slot = this->FindSlotById(userId);
 
     if (slot == nullptr)
     {
@@ -123,7 +139,7 @@ void Room::RemoveSlotById(std::uint32_t userId)
 
 [[nodiscard]] bool Room::IsUserIngame(std::uint32_t userId) const noexcept
 {
-    const auto* slot = this->FindSlotById(userId);
+    const auto slot = this->FindSlotById(userId);
 
     if (slot == nullptr)
     {
@@ -182,29 +198,30 @@ std::pair<bool, cso2::SlotStatus> Room::ToggleUserReadyStatus(
     }
 
     slot->SetStatus(newStatus);
-    this->BroadcastUserReadyStatus(*slot);
+    this->BroadcastUserReadyStatus(slot);
 
     return { true, newStatus };
 }
 
-[[nodiscard]] Slot* Room::FindSlotById(std::uint32_t userId) noexcept
+[[nodiscard]] SlotPtr Room::FindSlotById(std::uint32_t userId) noexcept
 {
-    return std::addressof(*ranges::find_if(
-        this->m_Slots, [userId](Slot& s) { return s.GetUserId() == userId; }));
+    return *ranges::find_if(this->m_Slots, [userId](SlotPtr s) {
+        return s->GetUserId() == userId;
+    });
 }
 
-[[nodiscard]] const Slot* Room::FindSlotById(
+[[nodiscard]] const SlotPtr Room::FindSlotById(
     std::uint32_t userId) const noexcept
 {
-    return std::addressof(*ranges::find_if(
-        this->m_Slots,
-        [userId](const Slot& s) { return s.GetUserId() == userId; }));
+    return *ranges::find_if(this->m_Slots, [userId](SlotPtr s) {
+        return s->GetUserId() == userId;
+    });
 }
 
 bool Room::IsUserInRoom(std::uint32_t userId) const
 {
-    return ranges::find_if(this->m_Slots, [userId](const Slot& slot) {
-               return slot.GetUserId() == userId;
+    return ranges::find_if(this->m_Slots, [userId](const SlotPtr slot) {
+               return slot->GetUserId() == userId;
            }) != this->m_Slots.end();
 }
 
@@ -328,18 +345,18 @@ void Room::HostGameStart()
     this->SetStatus(RoomStatus::Ingame);
     this->m_Host->SetStatus(cso2::SlotStatus::Ingame);
 
-    for (auto& slot : this->m_Slots)
+    for (auto slot : this->m_Slots)
     {
-        if (slot == *this->m_Host)
+        if (slot == this->m_Host)
         {
             continue;
         }
 
         this->SendRoomStatusTo(slot);
 
-        if (slot.GetStatus() == cso2::SlotStatus::Ready)
+        if (slot->GetStatus() == cso2::SlotStatus::Ready)
         {
-            slot.SetStatus(cso2::SlotStatus::Ingame);
+            slot->SetStatus(cso2::SlotStatus::Ingame);
             this->SendHostConnDataTo(slot);
             this->SendGuestConnDataToHost(slot);
         }
@@ -363,11 +380,11 @@ void Room::GuestJoinGame(std::uint32_t guestUserId)
         return;
     }
 
-    this->SendRoomStatusTo(*guestSlot);
+    this->SendRoomStatusTo(guestSlot);
     guestSlot->SetStatus(cso2::SlotStatus::Ingame);
 
-    this->SendHostConnDataTo(*guestSlot);
-    this->SendGuestConnDataToHost(*guestSlot);
+    this->SendHostConnDataTo(guestSlot);
+    this->SendGuestConnDataToHost(guestSlot);
 
     this->BroadcastAllReadyStatus();
 }
@@ -378,14 +395,14 @@ awaitable<void> Room::EndGame()
 
     this->SetStatus(RoomStatus::Waiting);
 
-    for (auto& slot : this->m_Slots)
+    for (auto slot : this->m_Slots)
     {
         this->SendRoomStatusTo(slot);
 
-        if (slot.IsIngame() == true)
+        if (slot->IsIngame() == true)
         {
             this->SendGameEndTo(slot);
-            slot.SetStatus(cso2::SlotStatus::NotReady);
+            slot->SetStatus(cso2::SlotStatus::NotReady);
         }
     }
 
@@ -463,13 +480,13 @@ void Room::UpdateUserTeam(std::uint32_t userId, cso2::TeamNum newTeam)
 
     if (this->m_Settings.AreBotsEnabled() == true && slot == this->m_Host)
     {
-        for (auto& curSlot : this->m_Slots)
+        for (auto curSlot : this->m_Slots)
         {
-            curSlot.SetTeam(newTeam);
+            curSlot->SetTeam(newTeam);
         }
     }
 
-    this->BroadcastNewUserTeam(*slot, newTeam);
+    this->BroadcastNewUserTeam(slot, newTeam);
 }
 
 void Room::AddEmptyListener(Room::EmptyCallback_t&& listener)
@@ -477,19 +494,19 @@ void Room::AddEmptyListener(Room::EmptyCallback_t&& listener)
     this->m_EmptyCallbacks.push_back(std::move(listener));
 }
 
-Slot* Room::ReserveSlot(ClientSessionPtr session)
+SlotPtr Room::ReserveSlot(ClientSessionPtr session)
 {
-    return std::addressof(
-        this->m_Slots.emplace_back(session, this->FindDesirableTeamNum()));
+    return this->m_Slots.emplace_back(
+        std::make_shared<Slot>(session, this->FindDesirableTeamNum()));
 }
 
-void Room::SetHost(Slot& newHost)
+void Room::SetHost(SlotPtr newHost)
 {
-    this->m_Host = std::addressof(newHost);
+    this->m_Host = newHost;
 
-    for (const auto& s : this->m_Slots)
+    for (auto s : this->m_Slots)
     {
-        s.GetSession()->Send(OutRoomPacket::SetHost(newHost.GetUserId()));
+        s->GetSession()->Send(OutRoomPacket::SetHost(newHost->GetUserId()));
     }
 }
 
@@ -498,9 +515,9 @@ void Room::SetHost(Slot& newHost)
     std::uint32_t trNum = 0;
     std::uint32_t ctNum = 0;
 
-    for (const auto& slot : this->m_Slots)
+    for (auto slot : this->m_Slots)
     {
-        auto team = slot.GetTeam();
+        auto team = slot->GetTeam();
 
         if (team == cso2::TeamNum::Terrorist)
         {
@@ -548,87 +565,87 @@ void Room::SetStatus(RoomStatus newStatus)
 
 void Room::ResetIngameUsersReadyStatus()
 {
-    for (auto& slot : this->m_Slots)
+    for (auto slot : this->m_Slots)
     {
-        slot.SetStatus(cso2::SlotStatus::NotReady);
+        slot->SetStatus(cso2::SlotStatus::NotReady);
     }
 }
 
-void Room::SendJoinRoom(const Slot& sourceSlot) const
+void Room::SendJoinRoom(const SlotPtr sourceSlot) const
 {
-    sourceSlot.GetSession()->Send(OutRoomPacket::CreateAndJoin(*this));
+    sourceSlot->GetSession()->Send(OutRoomPacket::CreateAndJoin(*this));
 }
 
-void Room::SendRoomSettings(const Slot& sourceSlot) const
+void Room::SendRoomSettings(const SlotPtr sourceSlot) const
 {
-    sourceSlot.GetSession()->Send(
+    sourceSlot->GetSession()->Send(
         OutRoomPacket::UpdateSettings(this->m_Settings));
 }
 
-void Room::SendTeamChangeGlobal(const Slot& sourceSlot,
+void Room::SendTeamChangeGlobal(const SlotPtr sourceSlot,
                                 cso2::TeamNum newTeamNum)
 {
-    auto sourceUserId = sourceSlot.GetUserId();
+    auto sourceUserId = sourceSlot->GetUserId();
 
-    for (const auto& slot : this->m_Slots)
+    for (auto slot : this->m_Slots)
     {
-        slot.GetSession()->Send(
+        slot->GetSession()->Send(
             OutRoomPacket::SetUserTeam(sourceUserId, newTeamNum));
     }
 }
 
-void Room::SendRoomStatusTo(const Slot& sourceSlot) const
+void Room::SendRoomStatusTo(const SlotPtr sourceSlot) const
 {
-    sourceSlot.GetSession()->Send(OutRoomPacket::UpdateStatusSettings(
+    sourceSlot->GetSession()->Send(OutRoomPacket::UpdateStatusSettings(
         this->m_Settings.GetStatus(), this->m_Settings.IsIngame()));
 }
 
-void Room::SendUserReadyStatusTo(const Slot& receivingSlot,
-                                 const Slot& sourceSlot) const
+void Room::SendUserReadyStatusTo(const SlotPtr receivingSlot,
+                                 const SlotPtr sourceSlot) const
 {
-    receivingSlot.GetSession()->Send(OutRoomPacket::SetPlayerReady(
-        sourceSlot.GetUserId(), sourceSlot.GetStatus()));
+    receivingSlot->GetSession()->Send(OutRoomPacket::SetPlayerReady(
+        sourceSlot->GetUserId(), sourceSlot->GetStatus()));
 }
 
-void Room::SendAllUserStatusTo(const Slot& userSlot) const
+void Room::SendAllUserStatusTo(const SlotPtr userSlot) const
 {
-    for (const auto& slot : this->m_Slots)
+    for (auto slot : this->m_Slots)
     {
         this->SendUserReadyStatusTo(userSlot, slot);
     }
 }
 
-void Room::SendHostConnDataTo(const Slot& slot) const
+void Room::SendHostConnDataTo(const SlotPtr slot) const
 {
     auto hostUserId = this->m_Host->GetUserId();
     auto hostSession = this->m_Host->GetSession();
 
-    auto session = slot.GetSession();
+    auto session = slot->GetSession();
     session->Send(
         OutUdpPacket::Udp(hostUserId, hostSession->GetExternalAddress(),
                           hostSession->GetExternalServerPort(), true));
     session->Send(OutHostPacket::HostJoin(hostUserId));
 }
 
-void Room::SendGuestConnDataToHost(const Slot& slot) const
+void Room::SendGuestConnDataToHost(const SlotPtr slot) const
 {
-    auto guestSession = slot.GetSession();
+    auto guestSession = slot->GetSession();
 
     this->m_Host->GetSession()->Send(
-        OutUdpPacket::Udp(slot.GetUserId(), guestSession->GetExternalAddress(),
+        OutUdpPacket::Udp(slot->GetUserId(), guestSession->GetExternalAddress(),
                           guestSession->GetExternalClientPort(), false));
 }
 
-void Room::SendGameEndTo(const Slot& slot) const
+void Room::SendGameEndTo(const SlotPtr slot) const
 {
-    auto s = slot.GetSession();
+    auto s = slot->GetSession();
     s->Send(OutHostPacket::HostStop());
     s->Send(OutRoomPacket::SetGameResult());
 }
 
-void Room::BroadcastNewUser(const Slot& newSlot) const
+void Room::BroadcastNewUser(const SlotPtr newSlot) const
 {
-    for (const auto& s : this->m_Slots)
+    for (auto s : this->m_Slots)
     {
         // don't send the new user message to the new user
         if (s == newSlot)
@@ -636,42 +653,42 @@ void Room::BroadcastNewUser(const Slot& newSlot) const
             continue;
         }
 
-        s.GetSession()->Send(OutRoomPacket::PlayerJoin(newSlot));
-        s.GetSession()->Send(OutRoomPacket::SetPlayerReady(
-            newSlot.GetUserId(), newSlot.GetStatus()));
+        s->GetSession()->Send(OutRoomPacket::PlayerJoin(newSlot));
+        s->GetSession()->Send(OutRoomPacket::SetPlayerReady(
+            newSlot->GetUserId(), newSlot->GetStatus()));
     }
 }
 
 void Room::BroadcastNewSettings() const
 {
-    for (auto& s : this->m_Slots)
+    for (auto s : this->m_Slots)
     {
-        s.GetSession()->Send(OutRoomPacket::UpdateSettings(this->m_Settings));
+        s->GetSession()->Send(OutRoomPacket::UpdateSettings(this->m_Settings));
     }
 }
 
-void Room::BroadcastUserReadyStatus(const Slot& userSlot) const
+void Room::BroadcastUserReadyStatus(const SlotPtr userSlot) const
 {
-    for (auto& s : this->m_Slots)
+    for (auto s : this->m_Slots)
     {
-        s.GetSession()->Send(OutRoomPacket::SetPlayerReady(
-            userSlot.GetUserId(), userSlot.GetStatus()));
+        s->GetSession()->Send(OutRoomPacket::SetPlayerReady(
+            userSlot->GetUserId(), userSlot->GetStatus()));
     }
 }
 
-void Room::BroadcastNewUserTeam(const Slot& sourceSlot,
+void Room::BroadcastNewUserTeam(const SlotPtr sourceSlot,
                                 cso2::TeamNum newTeamNum)
 {
-    auto sourceUserId = sourceSlot.GetUserId();
+    auto sourceUserId = sourceSlot->GetUserId();
 
-    for (auto& s : this->m_Slots)
+    for (auto s : this->m_Slots)
     {
-        s.GetSession()->Send(
+        s->GetSession()->Send(
             OutRoomPacket::SetUserTeam(sourceUserId, newTeamNum));
 
         if (this->m_Settings.AreBotsEnabled() == true)
         {
-            s.SetTeam(newTeamNum);
+            s->SetTeam(newTeamNum);
             this->SendTeamChangeGlobal(s, newTeamNum);
         }
     }
@@ -681,24 +698,24 @@ void Room::BroadcastCountdown(bool shouldCountdown)
 {
     if (shouldCountdown == true)
     {
-        for (const auto& s : this->m_Slots)
+        for (auto s : this->m_Slots)
         {
-            s.GetSession()->Send(
+            s->GetSession()->Send(
                 OutRoomPacket::ProgressCountdown(this->GetCountdown()));
         }
     }
     else
     {
-        for (const auto& s : this->m_Slots)
+        for (auto s : this->m_Slots)
         {
-            s.GetSession()->Send(OutRoomPacket::StopCountdown());
+            s->GetSession()->Send(OutRoomPacket::StopCountdown());
         }
     }
 }
 
 void Room::BroadcastAllReadyStatus() const
 {
-    for (const auto& s : this->m_Slots)
+    for (auto s : this->m_Slots)
     {
         this->SendAllUserStatusTo(s);
     }
@@ -708,30 +725,30 @@ awaitable<void> Room::RewardUsers()
 {
     auto winnerTeam = this->m_Match.GetWinningTeam();
 
-    for (auto& slot : this->m_Slots)
+    for (auto slot : this->m_Slots)
     {
-        if (slot.IsIngame() == false)
+        if (slot->IsIngame() == false)
         {
             continue;
         }
 
-        auto user = slot.GetSession()->GetUser();
+        auto user = slot->GetSession()->GetUser();
 
-        bool wonGame = winnerTeam == slot.GetTeam();
+        bool wonGame = winnerTeam == slot->GetTeam();
 
         bool res = co_await g_UserService->SetUserStats(
-            slot.GetUserId(),
-            { .Kills = user->GetKills() + slot.GetKills(),
-              .Deaths = user->GetDeaths() + slot.GetDeaths(),
-              .Assists = user->GetAssists() + slot.GetAssists(),
-              .Headshots = user->GetHeadshots() + slot.GetHeadshots(),
+            slot->GetUserId(),
+            { .Kills = user->GetKills() + slot->GetKills(),
+              .Deaths = user->GetDeaths() + slot->GetDeaths(),
+              .Assists = user->GetAssists() + slot->GetAssists(),
+              .Headshots = user->GetHeadshots() + slot->GetHeadshots(),
               .MatchesPlayed = user->GetNumOfPlayedMatches() + 1,
               .Wins = wonGame ? user->GetWins() + 1 : user->GetWins() });
 
         if (res == false)
         {
             Log::Warning("[Room::RewardUsers] failed to set user {}'s stats\n",
-                         slot.GetUserId());
+                         slot->GetUserId());
         }
     }
 }

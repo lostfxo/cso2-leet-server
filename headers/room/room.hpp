@@ -132,6 +132,7 @@ protected:
     void SendGameEndTo(const SlotPtr slot) const;
 
     void BroadcastNewUser(const SlotPtr newSlot) const;
+    void BroadcastUserLeft(uint32_t leavingUserId) const;
     void BroadcastNewSettings() const;
     void BroadcastUserReadyStatus(const SlotPtr userSlot) const;
     void BroadcastNewUserTeam(const SlotPtr sourceSlot,

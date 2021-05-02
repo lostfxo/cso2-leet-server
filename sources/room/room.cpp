@@ -78,10 +78,13 @@ void Room::RemoveSlotById(std::uint32_t userId)
     this->m_Slots.remove_if(
         [userId](const SlotPtr s) { return s->GetUserId() == userId; });
 
-    if (this->m_Slots.empty() == true)
+    if (!this->m_Slots.empty())
+    {
+        this->BroadcastUserLeft(userId);
+    }
+    else
     {
         this->TriggerEmptyEvent();
-        return;
     }
 }
 
@@ -656,6 +659,14 @@ void Room::BroadcastNewUser(const SlotPtr newSlot) const
         s->GetSession()->Send(OutRoomPacket::PlayerJoin(newSlot));
         s->GetSession()->Send(OutRoomPacket::SetPlayerReady(
             newSlot->GetUserId(), newSlot->GetStatus()));
+    }
+}
+
+void Room::BroadcastUserLeft(uint32_t leavingUserId) const
+{
+    for (auto s : this->m_Slots)
+    {
+        s->GetSession()->Send(OutRoomPacket::PlayerLeave(leavingUserId));
     }
 }
 

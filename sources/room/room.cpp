@@ -13,8 +13,6 @@
 #include "packets/out/room.hpp"
 #include "packets/out/udp.hpp"
 
-namespace ranges = std::ranges;
-
 constexpr const std::uint32_t ROOM_COUNTDOWN_SECONDS = 7;
 
 Room::Room(std::uint32_t roomId, NewRoomRequestOptions& options,
@@ -106,23 +104,25 @@ void Room::RemoveSlotById(std::uint32_t userId)
 
 [[nodiscard]] std::size_t Room::GetNumOfReadyHumanPlayers() const noexcept
 {
-    return ranges::count_if(this->m_Slots, [this](auto s) {
-        return s->GetStatus() == cso2::SlotStatus::Ready || s == this->m_Host;
-    });
+    return std::count_if(this->m_Slots.begin(), this->m_Slots.end(),
+                         [this](auto s) {
+                             return s->GetStatus() == cso2::SlotStatus::Ready ||
+                                    s == this->m_Host;
+                         });
 }
 
 [[nodiscard]] std::size_t Room::GetNumOfHumanCts() const noexcept
 {
-    return ranges::count_if(this->m_Slots, [](auto s) {
-        return s->GetTeam() == cso2::TeamNum::CounterTerrorist;
-    });
+    return std::count_if(
+        this->m_Slots.begin(), this->m_Slots.end(),
+        [](auto s) { return s->GetTeam() == cso2::TeamNum::CounterTerrorist; });
 }
 
 [[nodiscard]] std::size_t Room::GetNumOfHumanTerrorists() const noexcept
 {
-    return ranges::count_if(this->m_Slots, [](auto s) {
-        return s->GetTeam() == cso2::TeamNum::Terrorist;
-    });
+    return std::count_if(
+        this->m_Slots.begin(), this->m_Slots.end(),
+        [](auto s) { return s->GetTeam() == cso2::TeamNum::Terrorist; });
 }
 
 [[nodiscard]] bool Room::IsUserReady(std::uint32_t userId) const noexcept
@@ -208,24 +208,25 @@ std::pair<bool, cso2::SlotStatus> Room::ToggleUserReadyStatus(
 
 [[nodiscard]] SlotPtr Room::FindSlotById(std::uint32_t userId) noexcept
 {
-    return *ranges::find_if(this->m_Slots, [userId](SlotPtr s) {
-        return s->GetUserId() == userId;
-    });
+    return *std::find_if(
+        this->m_Slots.begin(), this->m_Slots.end(),
+        [userId](SlotPtr s) { return s->GetUserId() == userId; });
 }
 
 [[nodiscard]] const SlotPtr Room::FindSlotById(
     std::uint32_t userId) const noexcept
 {
-    return *ranges::find_if(this->m_Slots, [userId](SlotPtr s) {
-        return s->GetUserId() == userId;
-    });
+    return *std::find_if(
+        this->m_Slots.begin(), this->m_Slots.end(),
+        [userId](SlotPtr s) { return s->GetUserId() == userId; });
 }
 
 bool Room::IsUserInRoom(std::uint32_t userId) const
 {
-    return ranges::find_if(this->m_Slots, [userId](const SlotPtr slot) {
-               return slot->GetUserId() == userId;
-           }) != this->m_Slots.end();
+    return std::find_if(this->m_Slots.begin(), this->m_Slots.end(),
+                        [userId](const SlotPtr slot) {
+                            return slot->GetUserId() == userId;
+                        }) != this->m_Slots.end();
 }
 
 void Room::UpdateSettings(std::uint64_t updateFlags, RoomSettings&& newSettings)

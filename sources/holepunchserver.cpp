@@ -104,7 +104,6 @@ awaitable<void> HolepunchServer::ParsePacket()
     }
     catch (const std::exception& e)
     {
-        Log::Warning("Received invalid holepunch packet from {}\n",
-                     this->m_CurEndpoint.address().to_string());
+        Log::Warning("[HolepunchServer::ParsePacket] threw {}\n", e.what());
     }
 }

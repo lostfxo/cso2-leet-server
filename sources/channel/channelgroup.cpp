@@ -6,8 +6,6 @@
 
 #include "channel/channel.hpp"
 
-namespace ranges = std::ranges;
-
 ChannelGroup::ChannelGroup(std::string&& groupName, std::size_t index,
                            std::size_t channelsCount)
     : m_Index(index), m_GroupName(std::move(groupName))
@@ -28,8 +26,8 @@ ChannelGroup::ChannelGroup(std::string&& groupName, std::size_t index,
 }
 ChannelPtr ChannelGroup::GetChannelById(std::size_t channelId) const noexcept
 {
-    return *ranges::find_if(this->m_Channels,
-                            [channelId](const ChannelPtr channel) {
-                                return channel->GetIndex() == channelId;
-                            });
+    return *std::find_if(this->m_Channels.begin(), this->m_Channels.end(),
+                         [channelId](const ChannelPtr channel) {
+                             return channel->GetIndex() == channelId;
+                         });
 }

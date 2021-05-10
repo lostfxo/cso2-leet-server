@@ -22,8 +22,6 @@
 #include "packets/in/host/setinvobj.hpp"
 #include "packets/out/host.hpp"
 
-namespace ranges = std::ranges;
-
 awaitable<void> OnHostGameEndRequest(ClientSessionPtr session)
 {
     auto curRoom = session->GetCurRoom();
@@ -91,9 +89,9 @@ awaitable<void> OnHostSetLoadoutRequest(PacketView& packet,
 
     auto targetLoadouts = co_await g_UserService->GetAllLoadouts(reqPkt.UserId);
 
-    if (ranges::find_if(targetLoadouts, [](const auto& item) {
-            return item == nullptr;
-        }) != targetLoadouts.end())
+    if (std::find_if(targetLoadouts.begin(), targetLoadouts.end(),
+                     [](const auto& item) { return item == nullptr; }) !=
+        targetLoadouts.end())
     {
         Log::Warning(
             "[OnHostSetLoadoutRequest] failed to get user {}'s loadouts\n",

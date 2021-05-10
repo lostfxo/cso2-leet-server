@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <span>
+#include <string>
 
 #include "util/binary.hpp"
 

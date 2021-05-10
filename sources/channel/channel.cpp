@@ -7,8 +7,6 @@
 #include "cso2/user.hpp"
 #include "room/room.hpp"
 
-namespace ranges = std::ranges;
-
 Channel::Channel(std::string_view groupName, std::uint8_t channelIndex,
                  std::size_t totalChannelsCount)
     : m_Type(cso2::ChannelTypes::Free), m_Status(cso2::ChannelStatuses::Normal),
@@ -27,9 +25,9 @@ void Channel::AddRoom(RoomPtr newRoom)
 
 RoomPtr Channel::FindRoomById(std::uint32_t targetId) const
 {
-    return *ranges::find_if(this->m_Rooms, [targetId](const auto& r) {
-        return r->GetId() == targetId;
-    });
+    return *std::find_if(
+        this->m_Rooms.begin(), this->m_Rooms.end(),
+        [targetId](const auto& r) { return r->GetId() == targetId; });
 }
 
 void Channel::AddSessionToChannel(ClientSessionPtr session)

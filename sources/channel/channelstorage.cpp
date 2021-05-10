@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace ranges = std::ranges;
 using namespace std::string_literals;
 
 ChannelStorage g_Channels;
@@ -19,10 +18,11 @@ ChannelStorage::ChannelStorage()
     }
 }
 
-ChannelGroupPtr ChannelStorage::GetGroupByIndex(std::size_t index) const noexcept
+ChannelGroupPtr ChannelStorage::GetGroupByIndex(
+    std::size_t index) const noexcept
 {
-    return *ranges::find_if(this->m_Groups,
-                            [index](const ChannelGroupPtr group) {
-                                return group->GetIndex() == index;
-                            });
+    return *std::find_if(this->m_Groups.begin(), this->m_Groups.end(),
+                         [index](const ChannelGroupPtr group) {
+                             return group->GetIndex() == index;
+                         });
 }

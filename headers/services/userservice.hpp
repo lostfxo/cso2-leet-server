@@ -37,7 +37,7 @@ public:
     [[nodiscard]] awaitable<cso2::UserPtr> GetUserById(std::uint32_t id);
     [[nodiscard]] awaitable<std::uint32_t> Login(std::string_view username,
                                                  std::string_view password);
-    void Logout(std::uint32_t userId);
+    awaitable<bool> Logout(std::uint32_t userId);
 
     [[nodiscard]] awaitable<cso2::InventoryPtr> GetInventory(
         std::uint32_t ownerId);

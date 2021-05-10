@@ -394,9 +394,38 @@ awaitable<std::uint32_t> UserService::Login(std::string_view username,
     co_return cso2::INVALID_USER_ID;
 }
 
-void UserService::Logout(std::uint32_t userId)
+awaitable<bool> UserService::Logout(std::uint32_t userId)
 {
+    // remove the user regardless if the endpoint request fails
     this->m_Users.erase(userId);
+
+    try
+    {
+        if (this->IsAlive() == false)
+        {
+            throw std::runtime_error("Service is offline");
+        }
+
+        beast::tcp_stream stream(this->m_IoExecutor);
+        co_await stream.async_connect(this->m_ResolvedHost, use_awaitable);
+
+        json::value requestData = { { "userId", userId } };
+        auto req = BuildPostJsonRequest("/users/auth/logout", requestData);
+
+        co_await http::async_write(stream, req, use_awaitable);
+
+        beast::static_buffer<256> buffer;
+        http::response<http::empty_body> res;
+        co_await http::async_read(stream, buffer, res, use_awaitable);
+
+        co_return res.result() == http::status::ok;
+    }
+    catch (const std::exception& e)
+    {
+        Log::Warning("UserSvc::Logout - threw '{}'\n", e.what());
+    }
+
+    co_return false;
 }
 
 awaitable<bool> UserService::OnPing()

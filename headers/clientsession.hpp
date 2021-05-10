@@ -149,7 +149,7 @@ private:
     awaitable<void> AsyncReadLoop();
     awaitable<void> AsyncWriteLoop();
 
-    void Stop(const std::exception& exception) noexcept;
+    awaitable<void> Stop(const std::exception& exception);
 
     [[nodiscard]] inline std::uint8_t GetNextSeq() noexcept
     {

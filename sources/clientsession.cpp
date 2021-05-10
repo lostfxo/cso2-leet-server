@@ -171,7 +171,7 @@ awaitable<void> ClientSession::AsyncReadLoop()
         }
         catch (const std::exception& e)
         {
-            this->Stop(e);
+            co_await this->Stop(e);
             co_return;
         }
 
@@ -237,7 +237,7 @@ awaitable<void> ClientSession::AsyncWriteLoop()
     }
     catch (const std::exception& e)
     {
-        this->Stop(e);
+        co_await this->Stop(e);
     }
 }
 
@@ -252,7 +252,7 @@ void ClientSession::LogPacketData(const std::span<const std::uint8_t> data)
     }
 }
 
-void ClientSession::Stop(const std::exception& exception) noexcept
+awaitable<void> ClientSession::Stop(const std::exception& exception)
 {
     this->m_WriteTimer.cancel();
 
@@ -261,6 +261,7 @@ void ClientSession::Stop(const std::exception& exception) noexcept
         this->m_CurChannel->RemoveSessionFromChannel(shared_from_this());
     }
 
+    co_await g_UserService->Logout(this->GetUser()->GetId());
     g_Sessions.RemoveSession(shared_from_this());
 
     Log::Warning("[ClientSession::Stop] session stopped with reason: {}\n",

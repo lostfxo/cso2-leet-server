@@ -5,6 +5,7 @@
 #include <boost/asio/redirect_error.hpp>
 #include <boost/asio/write.hpp>
 
+#include "activesessions.hpp"
 #include "channel/channel.hpp"
 #include "cso2/user.hpp"
 #include "holepunch/shared.hpp"
@@ -12,6 +13,7 @@
 #include "packets/builder.hpp"
 #include "packets/view.hpp"
 #include "room/room.hpp"
+#include "services/userservice.hpp"
 #include "util/log.hpp"
 #include "util/randomstring.hpp"
 
@@ -258,6 +260,8 @@ void ClientSession::Stop(const std::exception& exception) noexcept
     {
         this->m_CurChannel->RemoveSessionFromChannel(shared_from_this());
     }
+
+    g_Sessions.RemoveSession(shared_from_this());
 
     Log::Warning("[ClientSession::Stop] session stopped with reason: {}\n",
                  exception.what());

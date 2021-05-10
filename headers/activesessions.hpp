@@ -9,9 +9,11 @@
 class ActiveSessions
 {
 public:
-    ActiveSessions() { this->m_Sessions.reserve(256); }
+    ActiveSessions();
 
     void AddSession(ClientSessionPtr s);
+    void RemoveSession(ClientSessionPtr targetSession);
+
     [[nodiscard]] ClientSessionPtr FindSessionByUserId(std::uint32_t userId);
     [[nodiscard]] ClientSessionPtr FindSessionByUserName(
         std::string_view userName);

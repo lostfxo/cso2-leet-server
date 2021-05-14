@@ -1,6 +1,7 @@
 #include "channel/channelstorage.hpp"
 
 #include <algorithm>
+#include <numeric>
 #include <stdexcept>
 
 using namespace std::string_literals;

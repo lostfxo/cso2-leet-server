@@ -1,6 +1,7 @@
 #include "buffer/dynamicbuffer.hpp"
 
 #include <cstring>
+#include <numeric>
 #include <stdexcept>
 
 DynamicBuffer::DynamicBuffer(std::size_t initialSize /*= 0*/) : m_CurOffset(0)

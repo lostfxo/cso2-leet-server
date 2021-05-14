@@ -4,6 +4,7 @@
 #include <array>
 #include <cstdint>
 #include <cstring>
+#include <numeric>
 #include <span>
 #include <stdexcept>
 #include <string_view>
@@ -32,8 +33,8 @@ public:
     {
         auto srcData = bigEndian ? ReverseEndianness<T>(data) : data;
         auto srcPtr = reinterpret_cast<std::uint8_t*>(&srcData);
-        this->WriteToOffsetArray(std::span<const std::uint8_t>{ srcPtr, sizeof(T) },
-                                 offset);
+        this->WriteToOffsetArray(
+            std::span<const std::uint8_t>{ srcPtr, sizeof(T) }, offset);
     }
 
     void WriteString(std::string_view str)
@@ -76,7 +77,8 @@ public:
         this->m_CurOffset += data.size_bytes();
     }
 
-    void WriteToOffsetArray(std::span<const std::uint8_t> data, std::size_t offset)
+    void WriteToOffsetArray(std::span<const std::uint8_t> data,
+                            std::size_t offset)
     {
         if (offset >= this->m_CurOffset)
         {
@@ -87,10 +89,11 @@ public:
                     data.size_bytes());
     }
 
-    [[nodiscard]] const std::span<const std::uint8_t> GetDataView() const noexcept
+    [[nodiscard]] const std::span<const std::uint8_t> GetDataView()
+        const noexcept
     {
         return std::span<const std::uint8_t>{ this->m_Buffer.data(),
-                                         this->m_CurOffset };
+                                              this->m_CurOffset };
     }
 
     [[nodiscard]] inline std::size_t GetCurOffset() const noexcept

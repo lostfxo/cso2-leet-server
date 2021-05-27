@@ -261,7 +261,11 @@ awaitable<void> ClientSession::Stop(const std::exception& exception)
         this->m_CurChannel->RemoveSessionFromChannel(shared_from_this());
     }
 
-    co_await g_UserService->Logout(this->GetUser()->GetId());
+    if (this->HasUser() == true)
+    {
+        co_await g_UserService->Logout(this->GetUser()->GetId());
+    }
+
     g_Sessions.RemoveSession(shared_from_this());
 
     Log::Warning("[ClientSession::Stop] session stopped with reason: {}\n",

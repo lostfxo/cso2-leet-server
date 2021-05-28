@@ -23,7 +23,9 @@ USERSERVICE_HOST=0.0.0.0 USERSERVICE_PORT=12345 ./leet-server -i 123.45.67.89 -p
 - `-l, --logging` (_optional_) Sets the log output verbosity, options: [debug, info, warning, error] (default: info)
 - `-i, --ip-address [ip]` (_optional_) The IP address to listen on (default: 0.0.0.0)
 - `-p, --port-master [port]` (_optional_) The server's (TCP) port (default: 30001)
-- `-P, --port-holepunch [port]` (_optional_) The server's holepunch (UDP) port (default: 30002)
+- `-P, --port-udp [port]` (_optional_) The server's holepunch (UDP) port (default: 30002)
+- `--public-ip-address [ip]` (_optional_) The public facing IP address that we will listen on (defaults to the value of `-i --ip-address`)
+- `--public-port-udp [port]` (_optional_) The public facing server's holepunch (UDP) port (defaults to the value of `-P, --port-udp`)
 - `-L, --log-packets` (_optional_) Log the incoming and outgoing packets
 
 ### Environment variables

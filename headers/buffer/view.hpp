@@ -33,6 +33,13 @@ public:
         return result;
     }
 
+    const std::span<const uint8_t> ReadView(std::size_t viewSize);
+
+    inline std::size_t GetRemainingBytes() const
+    {
+        return this->m_DataView.size_bytes() - this->m_CurDataOffset;
+    }
+
 protected:
     [[nodiscard]] inline bool CanReadBytes(
         std::size_t bytesCount) const noexcept

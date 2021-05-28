@@ -10,7 +10,8 @@ enum class HolepunchPacketType : std::uint8_t
     Punch = 0,
     HeartbeatForClient = 1,
     HeartbeatForServer = 2,
-    HeartbeatForSourceTV = 3
+    HeartbeatForSourceTV = 3,
+    ForwardToServer = 4
 };
 
 enum class HolepunchPortId : std::uint8_t

@@ -4,12 +4,13 @@
 
 #include "holepunchserver.hpp"
 #include "serverinstance.hpp"
+#include "serveroptions.hpp"
 #include "services/userservice.hpp"
 
 #include "clientconnection.hpp"
 #include "wait_util.hpp"
 
-std::uint16_t g_HolepunchPort = 0;
+ServerOptions g_ServerOptions;
 
 TEST_CASE("ServerInstance can be connected to", "[serverinstance]")
 {
@@ -24,25 +25,26 @@ TEST_CASE("ServerInstance can be connected to", "[serverinstance]")
 
     SECTION("Starting the server")
     {
-        serverThread = std::make_unique<std::thread>([&]() {
-            serverIoContext = std::make_unique<asio::io_context>();
+        serverThread = std::make_unique<std::thread>(
+            [&]()
+            {
+                serverIoContext = std::make_unique<asio::io_context>();
 
-            tcp::endpoint endpoint(tcp::v4(), 0);
-            udp::endpoint holepunchEndpoint(udp::v4(), 0);
+                tcp::endpoint endpoint(tcp::v4(), 0);
+                udp::endpoint holepunchEndpoint(udp::v4(), 0);
 
-            g_UserService = std::make_unique<UserService>("127.0.0.1", "30100",
-                                                          *serverIoContext);
+                g_UserService = std::make_unique<UserService>(
+                    "127.0.0.1", "30100", *serverIoContext);
 
-            ServerInstance server(*serverIoContext, endpoint, false);
-            HolepunchServer holepunchServer(*serverIoContext,
-                                            holepunchEndpoint);
+                ServerInstance server(*serverIoContext, endpoint, false);
+                HolepunchServer holepunchServer(*serverIoContext,
+                                                holepunchEndpoint);
 
-            serverMasterPort = server.GetPort();
-            serverUdpPort = holepunchServer.GetPort();
-            g_HolepunchPort = serverUdpPort;
+                serverMasterPort = server.GetPort();
+                serverUdpPort = holepunchServer.GetPort();
 
-            serverIoContext->run();
-        });
+                serverIoContext->run();
+            });
         REQUIRE(serverThread != nullptr);
     }
 
@@ -58,15 +60,18 @@ TEST_CASE("ServerInstance can be connected to", "[serverinstance]")
     {
         ClientConnection* connPtr = nullptr;
 
-        clientThread = std::make_unique<std::thread>([&]() {
-            clientIoContext = std::make_unique<asio::io_context>();
-            ClientConnection conn(*clientIoContext,
-                                  tcp::endpoint(tcp::v4(), serverMasterPort));
-            clientIoContext->run();
-        });
+        clientThread = std::make_unique<std::thread>(
+            [&]()
+            {
+                clientIoContext = std::make_unique<asio::io_context>();
+                ClientConnection conn(
+                    *clientIoContext,
+                    tcp::endpoint(tcp::v4(), serverMasterPort));
+                clientIoContext->run();
+            });
 
-        WaitByTask(
-            [&]() { return connPtr != nullptr && connPtr->IsOpen() == true; });
+        WaitByTask([&]()
+                   { return connPtr != nullptr && connPtr->IsOpen() == true; });
         REQUIRE(connPtr->IsOpen() == true);
     }
 

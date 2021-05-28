@@ -46,6 +46,8 @@ set(LEET_SOURCES_BASE
     "sources/handlers/roomhandler.cpp"
     "sources/handlers/userprofilehandler.cpp"
     "sources/handlers/versionhandler.cpp"
+    "sources/holepunch/inpacket/forward.cpp"
+    "sources/holepunch/inpacket/punch.cpp"
     "sources/holepunch/inpacket.cpp"
     "sources/holepunch/outpacket.cpp"
     "sources/packets/in/achievement/campaign.cpp"
@@ -129,6 +131,8 @@ set(LEET_HEADERS_BASE
     "headers/cso2/vector.hpp"
     "headers/generic/pingable.hpp"
     "headers/handlers.hpp"
+    "headers/holepunch/inpacket/forward.hpp"
+    "headers/holepunch/inpacket/punch.hpp"
     "headers/holepunch/inpacket.hpp"
     "headers/holepunch/outpacket.hpp"
     "headers/holepunch/shared.hpp"
@@ -201,7 +205,8 @@ set(LEET_HEADERS_BASE
     "headers/clientsession.hpp"
     "headers/holepunchserver.hpp"
     "headers/packetlogger.hpp"
-    "headers/serverinstance.hpp")
+    "headers/serverinstance.hpp"
+    "headers/serveroptions.hpp")
 
 file(GLOB LEET_ALL_SOURCES ${LEET_SOURCES_BASE} ${LEET_HEADERS_BASE})
 

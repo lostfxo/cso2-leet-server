@@ -11,17 +11,14 @@ public:
 
     [[nodiscard]] inline bool IsHeartbeat() const noexcept
     {
-        return this->m_Type > HolepunchPacketType::Punch;
+        return this->m_Type > HolepunchPacketType::Punch &&
+               this->m_Type <= HolepunchPacketType::HeartbeatForSourceTV;
     }
 
     // these members are memory aligned
     std::uint32_t m_UserId;
-    std::uint32_t m_IpAddress;
-    std::uint16_t m_PortNum;
-
     std::uint8_t m_Signature;
     HolepunchPacketType m_Type;
-    HolepunchPortId m_PortId;
 };
 
 #endif  // __HOLEPUNCH_INPACKET_H_

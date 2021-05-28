@@ -4,8 +4,8 @@
 
 #include "clientsession.hpp"
 #include "cso2/user.hpp"
-#include "globals.hpp"
 #include "packets/view.hpp"
+#include "serveroptions.hpp"
 #include "services/userservice.hpp"
 #include "system/dialogbox.hpp"
 #include "system/l10n.hpp"
@@ -124,9 +124,9 @@ awaitable<void> OnLoginPacketRequest(PacketView& packet,
         "[OnLoginPacketRequest] user '{}' logged in successfully (uid {})\n",
         loginPkt.GameUsername, session->GetUniqueId());
 
-    session->Send(
-        OutUserStartPacket::UserStart(loggedUserId, user->GetUserName(),
-                                      user->GetPlayerName(), g_HolepunchPort));
+    session->Send(OutUserStartPacket::UserStart(
+        loggedUserId, user->GetUserName(), user->GetPlayerName(),
+        g_ServerOptions.PublicUdpPort));
 
     session->Send(OutUserInfoPacket::FullUpdate(user));
 

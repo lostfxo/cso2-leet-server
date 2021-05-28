@@ -59,6 +59,23 @@ std::string BufferView::ReadLongString()
     return newStr;
 }
 
+const std::span<const uint8_t> BufferView::ReadView(std::size_t viewSize)
+{
+    if (this->CanReadBytes(viewSize) == false)
+    {
+        throw std::length_error(
+            "The desired data's length is larger than the available data");
+    }
+
+    auto dataStart = reinterpret_cast<const std::uint8_t*>(
+        &this->m_DataView[this->m_CurDataOffset]);
+
+    auto res = std::span<const uint8_t>{ dataStart, viewSize };
+
+    this->m_CurDataOffset += viewSize;
+    return res;
+}
+
 void BufferView::ReadImpl(std::span<std::uint8_t> outData)
 {
     if (this->CanReadBytes(outData.size_bytes()) == false)

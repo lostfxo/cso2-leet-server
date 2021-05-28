@@ -14,11 +14,4 @@ HolepunchInPacket::HolepunchInPacket(const std::span<const std::uint8_t> data)
 
     this->m_UserId = this->Read<std::uint32_t>();
     this->m_Type = HolepunchPacketType(this->Read<std::uint8_t>());
-
-    if (this->m_Type == HolepunchPacketType::Punch)
-    {
-        this->m_PortId = HolepunchPortId(this->Read<std::uint8_t>());
-        this->m_IpAddress = ~this->Read<std::uint32_t>(true);
-        this->m_PortNum = this->Read<std::uint16_t>();
-    }
 }

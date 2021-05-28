@@ -1,12 +1,14 @@
 #include "room/room.hpp"
 
 #include <algorithm>
+#include <boost/asio/ip/address_v4.hpp>
 
 #include "channel/channel.hpp"
 #include "clientsession.hpp"
 #include "cso2/definitions.hpp"
 #include "cso2/shared.hpp"
 #include "cso2/user.hpp"
+#include "serveroptions.hpp"
 #include "services/userservice.hpp"
 
 #include "packets/out/host.hpp"
@@ -73,8 +75,8 @@ void Room::RemoveSlotById(std::uint32_t userId)
         this->SetHost(newHost);
     }
 
-    this->m_Slots.remove_if(
-        [userId](const SlotPtr s) { return s->GetUserId() == userId; });
+    this->m_Slots.remove_if([userId](const SlotPtr s)
+                            { return s->GetUserId() == userId; });
 
     if (!this->m_Slots.empty())
     {
@@ -120,9 +122,9 @@ void Room::RemoveSlotById(std::uint32_t userId)
 
 [[nodiscard]] std::size_t Room::GetNumOfHumanTerrorists() const noexcept
 {
-    return std::count_if(
-        this->m_Slots.begin(), this->m_Slots.end(),
-        [](auto s) { return s->GetTeam() == cso2::TeamNum::Terrorist; });
+    return std::count_if(this->m_Slots.begin(), this->m_Slots.end(),
+                         [](auto s)
+                         { return s->GetTeam() == cso2::TeamNum::Terrorist; });
 }
 
 [[nodiscard]] bool Room::IsUserReady(std::uint32_t userId) const noexcept
@@ -208,17 +210,17 @@ std::pair<bool, cso2::SlotStatus> Room::ToggleUserReadyStatus(
 
 [[nodiscard]] SlotPtr Room::FindSlotById(std::uint32_t userId) noexcept
 {
-    return *std::find_if(
-        this->m_Slots.begin(), this->m_Slots.end(),
-        [userId](SlotPtr s) { return s->GetUserId() == userId; });
+    return *std::find_if(this->m_Slots.begin(), this->m_Slots.end(),
+                         [userId](SlotPtr s)
+                         { return s->GetUserId() == userId; });
 }
 
 [[nodiscard]] const SlotPtr Room::FindSlotById(
     std::uint32_t userId) const noexcept
 {
-    return *std::find_if(
-        this->m_Slots.begin(), this->m_Slots.end(),
-        [userId](SlotPtr s) { return s->GetUserId() == userId; });
+    return *std::find_if(this->m_Slots.begin(), this->m_Slots.end(),
+                         [userId](SlotPtr s)
+                         { return s->GetUserId() == userId; });
 }
 
 bool Room::IsUserInRoom(std::uint32_t userId) const
@@ -625,9 +627,17 @@ void Room::SendHostConnDataTo(const SlotPtr slot) const
     auto hostSession = this->m_Host->GetSession();
 
     auto session = slot->GetSession();
-    session->Send(
+
+    // UDP packet used with direct connections
+    /*session->Send(
         OutUdpPacket::Udp(hostUserId, hostSession->GetExternalAddress(),
-                          hostSession->GetExternalServerPort(), true));
+        hostSession->GetExternalServerPort(), true));*/
+
+    // UDP packet used with relay connections
+    session->Send(OutUdpPacket::Udp(
+        hostUserId,
+        asio::ip::make_address_v4(g_ServerOptions.PublicHostname).to_uint(),
+        g_ServerOptions.PublicUdpPort, true));
     session->Send(OutHostPacket::HostJoin(hostUserId));
 }
 
@@ -635,9 +645,16 @@ void Room::SendGuestConnDataToHost(const SlotPtr slot) const
 {
     auto guestSession = slot->GetSession();
 
-    this->m_Host->GetSession()->Send(
+    // UDP packet used with direct connections
+    /*this->m_Host->GetSession()->Send(
         OutUdpPacket::Udp(slot->GetUserId(), guestSession->GetExternalAddress(),
-                          guestSession->GetExternalClientPort(), false));
+        guestSession->GetExternalClientPort(), false));*/
+
+    // UDP packet used with relay connections
+    this->m_Host->GetSession()->Send(OutUdpPacket::Udp(
+        slot->GetUserId(),
+        asio::ip::make_address_v4(g_ServerOptions.PublicHostname).to_uint(),
+        g_ServerOptions.PublicUdpPort, false));
 }
 
 void Room::SendGameEndTo(const SlotPtr slot) const

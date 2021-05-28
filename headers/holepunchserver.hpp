@@ -1,8 +1,8 @@
 #ifndef __HOLEPUNCHSERVER_H_
 #define __HOLEPUNCHSERVER_H_
 
-#include <array>
 #include <cstdint>
+#include <span>
 
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/io_context.hpp>
@@ -11,6 +11,8 @@
 namespace asio = boost::asio;
 using boost::asio::awaitable;
 using boost::asio::ip::udp;
+
+class HolepunchInPacket;
 
 class HolepunchServer
 {
@@ -22,12 +24,14 @@ public:
 
 private:
     awaitable<void> AsyncOnReceive();
-    awaitable<void> ParsePacket();
+    awaitable<void> ParsePacket(std::span<uint8_t> buffer);
+
+    awaitable<void> HandlePunchRequest(HolepunchInPacket& pkt);
+    awaitable<void> HandleForwardRequest(HolepunchInPacket& pkt);
 
 private:
     udp::socket m_Socket;
     udp::endpoint m_CurEndpoint;
-    std::array<std::uint8_t, 16> m_CurBuffer;
 };
 
 #endif  // __HOLEPUNCHSERVER_H_

@@ -7,9 +7,9 @@
 #include <boost/asio/signal_set.hpp>
 
 #include "cmdparser.hpp"
-#include "globals.hpp"
 #include "holepunchserver.hpp"
 #include "serverinstance.hpp"
+#include "serveroptions.hpp"
 #include "util/log.hpp"
 
 #include "services/userservice.hpp"
@@ -22,22 +22,7 @@ constexpr const std::uint16_t DEFAULT_MASTER_PORT = 30001;
 constexpr const std::uint16_t DEFAULT_UDP_PORT = 30002;
 constexpr const std::uint16_t DEFAULT_USERSVC_PORT = 30100;
 
-std::uint16_t g_HolepunchPort = 0;
-
-struct ServerOptions
-{
-    // members are memory aligned
-    LogVerbosity Verbosity;
-
-    std::string_view Hostname;
-    std::string_view UserSvcHost;
-
-    std::uint16_t MasterPort;
-    std::uint16_t UdpPort;
-    std::uint16_t UserSvcPort;
-
-    bool ShouldLogPackets;
-};
+ServerOptions g_ServerOptions;
 
 ServerOptions GetCmdOptions(const CmdParser& cmd)
 {
@@ -96,6 +81,20 @@ ServerOptions GetCmdOptions(const CmdParser& cmd)
             "The UDP (holepunch) port number is invalid.");
     }
 
+    std::string_view publicIp = ipAddress;
+
+    if (cmd.HasOption("--public-ip-address") == true)
+    {
+        ipAddress = cmd.GetOption("--public-ip-address");
+    }
+
+    std::uint16_t publicUdpPort = udpPort;
+
+    if (cmd.HasOption("--public-udp-port") == true)
+    {
+        publicUdpPort = cmd.GetUintOption("--public-udp-port");
+    }
+
     std::string_view userSvcHost;
     auto userSvcHostPtr = std::getenv("USERSERVICE_HOST");
 
@@ -125,9 +124,11 @@ ServerOptions GetCmdOptions(const CmdParser& cmd)
 
     return { .Verbosity = logVerb,
              .Hostname = ipAddress,
+             .PublicHostname = publicIp,
              .UserSvcHost = userSvcHost,
              .MasterPort = masterPort,
              .UdpPort = udpPort,
+             .PublicUdpPort = publicUdpPort,
              .UserSvcPort = userSvcPort,
              .ShouldLogPackets = shouldLogPackets };
 }
@@ -147,10 +148,14 @@ void PrintHelp()
            "\t-i, --ip-address [...] The IP address to be used by the server\n"
            "\t-p, --port-master [...] - The TCP port to be used by the "
            "server's client connections\n"
-           "\t-P, --port-holepunch [...] - The UDP port to be used by "
+           "\t-P, --port-udp [...] - The UDP port to be used by "
            "the server's holepuncher\n"
-           "\t--usersvc-host [...] The hostname of an user service\n"
-           "\t--usersvc-port [...] The port number of an user service\n"
+           "\t--public-ip-address [...] The public facing IP address to be "
+           "used "
+           "by the server (defaults to the value of '-i, --ip-address')\n"
+           "\t--public-udp-port [...] - The public facing UDP port to be "
+           "used by the server's holepuncher (defaults to the value of '-P, "
+           "--port-udp')\n"
            "\t-v, --version - Print the program's version\n"
            "\t-h, --help - Print this help message\n";
 }
@@ -180,23 +185,23 @@ int main(int argc, char* argv[])
 
     try
     {
-        auto options = GetCmdOptions(cmd);
+        g_ServerOptions = GetCmdOptions(cmd);
 
-        Log::SetVerbosity(options.Verbosity);
+        Log::SetVerbosity(g_ServerOptions.Verbosity);
 
         asio::io_context io_context;
 
-        auto hostIp = asio::ip::make_address_v4(options.Hostname);
+        auto hostIp = asio::ip::make_address_v4(g_ServerOptions.Hostname);
 
-        tcp::endpoint endpoint(hostIp, options.MasterPort);
-        udp::endpoint holepunchEndpoint(hostIp, options.UdpPort);
+        tcp::endpoint endpoint(hostIp, g_ServerOptions.MasterPort);
+        udp::endpoint holepunchEndpoint(hostIp, g_ServerOptions.UdpPort);
 
-        g_HolepunchPort = options.UdpPort;
         g_UserService = std::make_unique<UserService>(
-            options.UserSvcHost, std::to_string(options.UserSvcPort),
-            io_context);
+            g_ServerOptions.UserSvcHost,
+            std::to_string(g_ServerOptions.UserSvcPort), io_context);
 
-        ServerInstance server(io_context, endpoint, options.ShouldLogPackets);
+        ServerInstance server(io_context, endpoint,
+                              g_ServerOptions.ShouldLogPackets);
         HolepunchServer holepunchServer(io_context, holepunchEndpoint);
 
         asio::signal_set signals(io_context, SIGINT, SIGTERM);

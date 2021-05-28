@@ -85,7 +85,7 @@ ServerOptions GetCmdOptions(const CmdParser& cmd)
 
     if (cmd.HasOption("--public-ip-address") == true)
     {
-        ipAddress = cmd.GetOption("--public-ip-address");
+        publicIp = cmd.GetOption("--public-ip-address");
     }
 
     std::uint16_t publicUdpPort = udpPort;

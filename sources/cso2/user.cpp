@@ -40,9 +40,8 @@ User::User(const json::value& jv)
         gsl::narrow<std::uint32_t>(jv.at("headshots").as_int64());
     this->m_Accuracy = gsl::narrow<std::uint16_t>(jv.at("accuracy").as_int64());
 
-    auto arrayConversion = [](const json::value v) -> int64_t {
-        return v.as_int64();
-    };
+    auto arrayConversion = [](const json::value v) -> int64_t
+    { return v.as_int64(); };
 
     this->m_Avatar = gsl::narrow<std::uint16_t>(jv.at("avatar").as_int64());
     const auto& unlockedAvatars = jv.at("unlocked_avatars").as_array();
@@ -92,5 +91,8 @@ User::User(const json::value& jv)
         JStrToUint64(jv.at("skill_zombie_maxxp").as_string());
     this->m_SkillZombiePoints =
         gsl::narrow<std::uint8_t>(jv.at("skill_zombie_points").as_int64());
+
+    this->m_ForceRelayHost = jv.at("force_relay_host").as_bool();
+    this->m_ForceRelayGuest = jv.at("force_relay_guest").as_bool();
 }
 }  // namespace cso2

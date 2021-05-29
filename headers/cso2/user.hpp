@@ -26,193 +26,122 @@ public:
 
     inline bool operator==(const User& u) { return this->GetId() == u.GetId(); }
 
-    [[nodiscard]] inline std::uint32_t GetId() const noexcept { return this->m_Id; }
+    inline std::uint32_t GetId() const { return this->m_Id; }
 
-    [[nodiscard]] inline std::string_view GetUserName() const noexcept
-    {
-        return this->m_UserName;
-    }
-    [[nodiscard]] inline std::string_view GetPlayerName() const noexcept
-    {
-        return this->m_PlayerName;
-    }
-    [[nodiscard]] inline std::string_view GetNetcafeName() const noexcept
+    inline std::string_view GetUserName() const { return this->m_UserName; }
+    inline std::string_view GetPlayerName() const { return this->m_PlayerName; }
+    inline std::string_view GetNetcafeName() const
     {
         return this->m_NetcafeName;
     }
 
-    [[nodiscard]] inline bool IsGameMaster() const noexcept
-    {
-        return this->m_GameMaster;
-    }
+    inline bool IsGameMaster() const { return this->m_GameMaster; }
 
-    [[nodiscard]] inline std::uint64_t GetPoints() const noexcept
-    {
-        return this->m_Points;
-    }
-    [[nodiscard]] inline std::uint32_t GetCash() const noexcept
-    {
-        return this->m_Cash;
-    }
-    [[nodiscard]] inline std::uint32_t GetMileage() const noexcept
-    {
-        return this->m_Mileage;
-    }
+    inline std::uint64_t GetPoints() const { return this->m_Points; }
+    inline std::uint32_t GetCash() const { return this->m_Cash; }
+    inline std::uint32_t GetMileage() const { return this->m_Mileage; }
 
-    [[nodiscard]] inline std::uint16_t GetLevel() const noexcept
-    {
-        return this->m_Level;
-    }
-    [[nodiscard]] inline std::uint64_t GetCurXp() const noexcept
-    {
-        return this->m_CurXp;
-    }
-    [[nodiscard]] inline std::uint64_t GetMaxXp() const noexcept
-    {
-        return this->m_MaxXp;
-    }
+    inline std::uint16_t GetLevel() const { return this->m_Level; }
+    inline std::uint64_t GetCurXp() const { return this->m_CurXp; }
+    inline std::uint64_t GetMaxXp() const { return this->m_MaxXp; }
 
-    [[nodiscard]] inline std::uint8_t GetVipLevel() const noexcept
-    {
-        return this->m_VipLevel;
-    }
-    [[nodiscard]] inline std::uint32_t GetVipXp() const noexcept
-    {
-        return this->m_VipXp;
-    }
-    [[nodiscard]] inline bool IsVip() const noexcept
-    {
-        return this->m_VipLevel > 0;
-    }
+    inline std::uint8_t GetVipLevel() const { return this->m_VipLevel; }
+    inline std::uint32_t GetVipXp() const { return this->m_VipXp; }
+    inline bool IsVip() const { return this->m_VipLevel > 0; }
 
-    [[nodiscard]] inline std::uint8_t GetRank() const noexcept
-    {
-        return this->m_Rank;
-    }
-    [[nodiscard]] inline std::uint8_t GetRankFrame() const noexcept
-    {
-        return this->m_RankFrame;
-    }
+    inline std::uint8_t GetRank() const { return this->m_Rank; }
+    inline std::uint8_t GetRankFrame() const { return this->m_RankFrame; }
 
-    [[nodiscard]] inline std::uint32_t GetNumOfPlayedMatches() const noexcept
+    inline std::uint32_t GetNumOfPlayedMatches() const
     {
         return this->m_PlayedMatches;
     }
-    [[nodiscard]] inline std::uint32_t GetWins() const noexcept
-    {
-        return this->m_Wins;
-    }
-    [[nodiscard]] inline std::uint32_t GetSecondsPlayed() const noexcept
+    inline std::uint32_t GetWins() const { return this->m_Wins; }
+    inline std::uint32_t GetSecondsPlayed() const
     {
         return this->m_SecondsPlayed;
     }
 
-    [[nodiscard]] inline std::uint32_t GetKills() const noexcept
-    {
-        return this->m_Kills;
-    }
-    [[nodiscard]] inline std::uint32_t GetDeaths() const noexcept
-    {
-        return this->m_Deaths;
-    }
-    [[nodiscard]] inline std::uint32_t GetAssists() const noexcept
-    {
-        return this->m_Assists;
-    }
-    [[nodiscard]] inline std::uint32_t GetHeadshots() const noexcept
-    {
-        return this->m_Headshots;
-    }
-    [[nodiscard]] inline std::uint16_t GetAccuracy() const noexcept
-    {
-        return this->m_Accuracy;
-    }
+    inline std::uint32_t GetKills() const { return this->m_Kills; }
+    inline std::uint32_t GetDeaths() const { return this->m_Deaths; }
+    inline std::uint32_t GetAssists() const { return this->m_Assists; }
+    inline std::uint32_t GetHeadshots() const { return this->m_Headshots; }
+    inline std::uint16_t GetAccuracy() const { return this->m_Accuracy; }
 
-    [[nodiscard]] inline std::uint16_t GetAvatar() const noexcept
-    {
-        return this->m_Avatar;
-    }
-    [[nodiscard]] inline const auto& GetUnlockedAvatars() const noexcept
+    inline std::uint16_t GetAvatar() const { return this->m_Avatar; }
+    inline const auto& GetUnlockedAvatars() const
     {
         return this->m_UnlockedAvatars;
     }
 
-    [[nodiscard]] inline std::uint16_t GetTitle() const noexcept
-    {
-        return this->m_Title;
-    }
-    [[nodiscard]] inline const auto& GetUnlockedTitles() const noexcept
+    inline std::uint16_t GetTitle() const { return this->m_Title; }
+    inline const auto& GetUnlockedTitles() const
     {
         return this->m_UnlockedTitles;
     }
 
-    [[nodiscard]] inline std::string_view GetSignature() const noexcept
-    {
-        return this->m_Signature;
-    }
+    inline std::string_view GetSignature() const { return this->m_Signature; }
 
-    [[nodiscard]] inline const auto& GetUnlockedAchievements() const noexcept
+    inline const auto& GetUnlockedAchievements() const
     {
         return this->m_UnlockedAchievements;
     }
 
-    [[nodiscard]] inline std::uint8_t GetNumOfUnreadMessages() const noexcept
+    inline std::uint8_t GetNumOfUnreadMessages() const
     {
         return this->m_NumUnreadMessages;
     }
 
-    [[nodiscard]] inline CampaignFlags GetCampaignFlags() const noexcept
+    inline CampaignFlags GetCampaignFlags() const
     {
         return this->m_CampaignFlags;
     }
 
-    [[nodiscard]] inline std::string_view GetClanName() const noexcept
-    {
-        return this->m_ClanName;
-    }
-    [[nodiscard]] inline std::uint32_t GetClanMark() const noexcept
-    {
-        return this->m_ClanMark;
-    }
+    inline std::string_view GetClanName() const { return this->m_ClanName; }
+    inline std::uint32_t GetClanMark() const { return this->m_ClanMark; }
 
-    [[nodiscard]] inline std::uint32_t GetWorldRank() const noexcept
-    {
-        return this->m_WorldRank;
-    }
+    inline std::uint32_t GetWorldRank() const { return this->m_WorldRank; }
 
-    [[nodiscard]] inline std::uint32_t GetBestGamemode() const noexcept
+    inline std::uint32_t GetBestGamemode() const
     {
         return this->m_BestGamemode;
     }
-    [[nodiscard]] inline std::uint32_t GetBestMap() const noexcept
-    {
-        return this->m_BestMap;
-    }
+    inline std::uint32_t GetBestMap() const { return this->m_BestMap; }
 
-    [[nodiscard]] inline std::uint64_t GetSkillHumanCurXp() const noexcept
+    inline std::uint64_t GetSkillHumanCurXp() const
     {
         return this->m_SkillHumanCurXp;
     }
-    [[nodiscard]] inline std::uint64_t GetSkillHumanMaxXp() const noexcept
+    inline std::uint64_t GetSkillHumanMaxXp() const
     {
         return this->m_SkillHumanMaxXp;
     }
-    [[nodiscard]] inline std::uint8_t GetSkillHumanPoints() const noexcept
+    inline std::uint8_t GetSkillHumanPoints() const
     {
         return this->m_SkillHumanPoints;
     }
 
-    [[nodiscard]] inline std::uint64_t GetSkillZombieCurXp() const noexcept
+    inline std::uint64_t GetSkillZombieCurXp() const
     {
         return this->m_SkillZombieCurXp;
     }
-    [[nodiscard]] inline std::uint64_t GetSkillZombieMaxXp() const noexcept
+    inline std::uint64_t GetSkillZombieMaxXp() const
     {
         return this->m_SkillZombieMaxXp;
     }
-    [[nodiscard]] inline std::uint8_t GetSkillZombiePoints() const noexcept
+    inline std::uint8_t GetSkillZombiePoints() const
     {
         return this->m_SkillZombiePoints;
+    }
+
+    inline bool ShouldForceRelayAsHost() const
+    {
+        return this->m_ForceRelayHost;
+    }
+
+    inline bool ShouldForceRelayAsGuest() const
+    {
+        return this->m_ForceRelayGuest;
     }
 
 private:
@@ -279,6 +208,9 @@ private:
     std::uint8_t m_NumUnreadMessages;  // TODO: what is this for?
 
     bool m_GameMaster;
+
+    bool m_ForceRelayHost;
+    bool m_ForceRelayGuest;
 
     friend ::UserService;
 };

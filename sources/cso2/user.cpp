@@ -93,6 +93,5 @@ User::User(const json::value& jv)
         gsl::narrow<std::uint8_t>(jv.at("skill_zombie_points").as_int64());
 
     this->m_ForceRelayHost = jv.at("force_relay_host").as_bool();
-    this->m_ForceRelayGuest = jv.at("force_relay_guest").as_bool();
 }
 }  // namespace cso2

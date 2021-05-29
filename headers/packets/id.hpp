@@ -39,7 +39,10 @@ enum class PacketId : std::uint8_t
     RoomList = 151,
     Inventory_Add = 152,
     Inventory_Create = 154,
-    UserInfo = 157
+    UserInfo = 157,
+
+    Custom = 254  // made up packet added to cso2-launcher
+                  // this doesnt exist in the original game
 };
 
 #endif  // __PACKET_ID_H_

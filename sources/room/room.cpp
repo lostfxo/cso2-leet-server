@@ -11,6 +11,7 @@
 #include "serveroptions.hpp"
 #include "services/userservice.hpp"
 
+#include "packets/out/custom.hpp"
 #include "packets/out/host.hpp"
 #include "packets/out/room.hpp"
 #include "packets/out/udp.hpp"
@@ -351,6 +352,12 @@ void Room::HostGameStart()
     this->SetStatus(RoomStatus::Ingame);
     this->m_Host->SetStatus(cso2::SlotStatus::Ingame);
 
+    auto hostSession = this->m_Host->GetSession();
+    auto hostUser = this->m_Host->GetSession()->GetUser();
+
+    hostSession->Send(
+        OutCustomPacket::SetUseRelay(hostUser->ShouldForceRelayAsHost()));
+
     for (auto slot : this->m_Slots)
     {
         if (slot == this->m_Host)
@@ -625,36 +632,59 @@ void Room::SendHostConnDataTo(const SlotPtr slot) const
 {
     auto hostUserId = this->m_Host->GetUserId();
     auto hostSession = this->m_Host->GetSession();
+    auto hostUser = hostSession->GetUser();
 
     auto session = slot->GetSession();
+    auto slotUser = session->GetUser();
 
-    // UDP packet used with direct connections
-    /*session->Send(
-        OutUdpPacket::Udp(hostUserId, hostSession->GetExternalAddress(),
-        hostSession->GetExternalServerPort(), true));*/
+    bool useRelay = hostUser->ShouldForceRelayAsHost();
 
-    // UDP packet used with relay connections
-    session->Send(OutUdpPacket::Udp(
-        hostUserId,
-        asio::ip::make_address_v4(g_ServerOptions.PublicHostname).to_uint(),
-        g_ServerOptions.PublicUdpPort, true));
+    session->Send(OutCustomPacket::SetUseRelay(useRelay));
+
+    if (useRelay == true)
+    {
+        // UDP packet used with relay connections
+        session->Send(OutUdpPacket::Udp(
+            hostUserId,
+            asio::ip::make_address_v4(g_ServerOptions.PublicHostname).to_uint(),
+            g_ServerOptions.PublicUdpPort, true));
+    }
+    else
+    {
+        // UDP packet used with direct connections
+        session->Send(
+            OutUdpPacket::Udp(hostUserId, hostSession->GetExternalAddress(),
+                              hostSession->GetExternalServerPort(), true));
+    }
+
     session->Send(OutHostPacket::HostJoin(hostUserId));
 }
 
 void Room::SendGuestConnDataToHost(const SlotPtr slot) const
 {
+    auto hostSession = this->m_Host->GetSession();
+    auto hostUser = hostSession->GetUser();
+
     auto guestSession = slot->GetSession();
+    auto guestUser = guestSession->GetUser();
 
-    // UDP packet used with direct connections
-    /*this->m_Host->GetSession()->Send(
-        OutUdpPacket::Udp(slot->GetUserId(), guestSession->GetExternalAddress(),
-        guestSession->GetExternalClientPort(), false));*/
+    bool useRelay = hostUser->ShouldForceRelayAsHost();
 
-    // UDP packet used with relay connections
-    this->m_Host->GetSession()->Send(OutUdpPacket::Udp(
-        slot->GetUserId(),
-        asio::ip::make_address_v4(g_ServerOptions.PublicHostname).to_uint(),
-        g_ServerOptions.PublicUdpPort, false));
+    if (useRelay == true)
+    {
+        // UDP packet used with relay connections
+        this->m_Host->GetSession()->Send(OutUdpPacket::Udp(
+            slot->GetUserId(),
+            asio::ip::make_address_v4(g_ServerOptions.PublicHostname).to_uint(),
+            g_ServerOptions.PublicUdpPort, false));
+    }
+    else
+    {
+        // UDP packet used with direct connections
+        this->m_Host->GetSession()->Send(OutUdpPacket::Udp(
+            slot->GetUserId(), guestSession->GetExternalAddress(),
+            guestSession->GetExternalClientPort(), false));
+    }
 }
 
 void Room::SendGameEndTo(const SlotPtr slot) const

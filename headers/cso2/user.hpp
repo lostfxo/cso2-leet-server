@@ -139,11 +139,6 @@ public:
         return this->m_ForceRelayHost;
     }
 
-    inline bool ShouldForceRelayAsGuest() const
-    {
-        return this->m_ForceRelayGuest;
-    }
-
 private:
     // these properties were aligned this way they so they use less memory
     std::uint32_t m_Id;
@@ -210,7 +205,6 @@ private:
     bool m_GameMaster;
 
     bool m_ForceRelayHost;
-    bool m_ForceRelayGuest;
 
     friend ::UserService;
 };

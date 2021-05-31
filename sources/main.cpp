@@ -1,5 +1,6 @@
 #include <cstdlib>
 #include <iostream>
+#include <stdexcept>
 #include <string_view>
 #include <thread>
 
@@ -8,6 +9,7 @@
 
 #include "cmdparser.hpp"
 #include "holepunchserver.hpp"
+#include "platform.hpp"
 #include "serverinstance.hpp"
 #include "serveroptions.hpp"
 #include "util/log.hpp"
@@ -37,15 +39,49 @@ ServerOptions GetCmdOptions(const CmdParser& cmd)
         logVerb = StringToLogVerbosity(cmd.GetOption("--logging"));
     }
 
-    std::string_view ipAddress = DEFAULT_IP_ADDRESS;
+    bool hasIpOption = cmd.HasOption("-i") && cmd.HasOption("--ip-address");
+    bool hasIntfOption = cmd.HasOption("-I") && cmd.HasOption("--interface");
 
-    if (cmd.HasOption("-i") == true)
+    if (hasIpOption == true && hasIntfOption == true)
+    {
+        throw std::runtime_error(
+            "You many only specify --ip-address or --interface, not both");
+    }
+
+    std::string ipAddress;
+    std::string_view targetIntf;
+
+    if (cmd.HasOption("-I") == true)
+    {
+        targetIntf = cmd.GetOption("-I");
+    }
+    else if (cmd.HasOption("--interface") == true)
+    {
+        targetIntf = cmd.GetOption("--interface");
+    }
+
+    if (targetIntf.empty() == false)
+    {
+        auto [success, foundIp] = FindIpOfInterface(targetIntf);
+
+        if (success == false)
+        {
+            throw std::runtime_error("Failed to find desired interface");
+        }
+
+        ipAddress = std::move(foundIp);
+    }
+    else if (cmd.HasOption("-i") == true)
     {
         ipAddress = cmd.GetOption("-i");
     }
     else if (cmd.HasOption("--ip-address") == true)
     {
         ipAddress = cmd.GetOption("--ip-address");
+    }
+    else
+    {
+        ipAddress = DEFAULT_IP_ADDRESS;
     }
 
     std::uint16_t masterPort = DEFAULT_MASTER_PORT;
@@ -145,7 +181,10 @@ void PrintHelp()
         << "Options available:\n"
            "\t-l, --logging - Sets the log output verbosity, options: [debug, "
            "info, warning, error]\n"
-           "\t-i, --ip-address [...] The IP address to be used by the server\n"
+           "\t-i, --ip-address [...] The IP address to be bound by the server "
+           "(do not use with --interface)\n"
+           "\t-I, --interface [...] The interface to be bound by the server "
+           "(do not use with --ip-address)\n"
            "\t-p, --port-master [...] - The TCP port to be used by the "
            "server's client connections\n"
            "\t-P, --port-udp [...] - The UDP port to be used by "
@@ -172,7 +211,7 @@ int main(int argc, char* argv[])
     if (cmd.HasOption("-v") == true || cmd.HasOption("--version"))
     {
         PrintVersion();
-        return 0;
+        return EXIT_SUCCESS;
     }
 
     PrintHeader();
@@ -180,7 +219,7 @@ int main(int argc, char* argv[])
     if (cmd.HasOption("-h") == true || cmd.HasOption("--help"))
     {
         PrintHelp();
-        return 0;
+        return EXIT_SUCCESS;
     }
 
     try
@@ -222,9 +261,10 @@ int main(int argc, char* argv[])
     catch (std::exception& e)
     {
         Log::Error("The server threw an error: {}\n", e.what());
+        return EXIT_FAILURE;
     }
 
     Log::Info("Stopped master server\n");
 
-    return 0;
+    return EXIT_SUCCESS;
 }

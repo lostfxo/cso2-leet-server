@@ -11,7 +11,7 @@ struct ServerOptions
     // members are memory aligned
     LogVerbosity Verbosity;
 
-    std::string_view Hostname;
+    std::string Hostname;
     std::string_view PublicHostname;
     std::string_view UserSvcHost;
 

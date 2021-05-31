@@ -113,6 +113,12 @@ set(LEET_SOURCES_BASE
     "sources/packetlogger.cpp"
     "sources/serverinstance.cpp")
 
+if(WIN32)
+  set(LEET_SOURCES_BASE "sources/platform/win32.cpp" ${LEET_SOURCES_BASE})
+elseif(UNIX)
+  set(LEET_SOURCES_BASE "sources/platform/unix.cpp" ${LEET_SOURCES_BASE})
+endif()
+
 set(LEET_HEADERS_BASE
     "headers/buffer/dynamicbuffer.hpp"
     "headers/buffer/staticbuffer.hpp"
@@ -207,6 +213,7 @@ set(LEET_HEADERS_BASE
     "headers/clientsession.hpp"
     "headers/holepunchserver.hpp"
     "headers/packetlogger.hpp"
+    "headers/platform.hpp"
     "headers/serverinstance.hpp"
     "headers/serveroptions.hpp")
 

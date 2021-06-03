@@ -12,7 +12,7 @@ struct ServerOptions
     LogVerbosity Verbosity;
 
     std::string Hostname;
-    std::string_view PublicHostname;
+    std::string PublicHostname;
     std::string_view UserSvcHost;
 
     std::uint16_t MasterPort;

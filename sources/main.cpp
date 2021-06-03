@@ -117,7 +117,7 @@ ServerOptions GetCmdOptions(const CmdParser& cmd)
             "The UDP (holepunch) port number is invalid.");
     }
 
-    std::string_view publicIp = ipAddress;
+    std::string publicIp = ipAddress;
 
     if (cmd.HasOption("--public-ip-address") == true)
     {
@@ -158,9 +158,14 @@ ServerOptions GetCmdOptions(const CmdParser& cmd)
     bool shouldLogPackets =
         cmd.HasOption("-L") || cmd.HasOption("--log-packets");
 
+    std::cout << "ipaddress: " << ipAddress << "\n";
+    std::cout << "publicIp: " << publicIp << "\n";
+    std::cout << "publicIp: " << asio::ip::make_address_v4(publicIp).to_uint()
+              << "\n";
+
     return { .Verbosity = logVerb,
-             .Hostname = ipAddress,
-             .PublicHostname = publicIp,
+             .Hostname = std::move(ipAddress),
+             .PublicHostname = std::move(publicIp),
              .UserSvcHost = userSvcHost,
              .MasterPort = masterPort,
              .UdpPort = udpPort,

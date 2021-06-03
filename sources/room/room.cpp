@@ -15,6 +15,7 @@
 #include "packets/out/host.hpp"
 #include "packets/out/room.hpp"
 #include "packets/out/udp.hpp"
+#include "system/dialogbox.hpp"
 
 constexpr const std::uint32_t ROOM_COUNTDOWN_SECONDS = 7;
 
@@ -586,7 +587,17 @@ void Room::ResetIngameUsersReadyStatus()
 
 void Room::SendJoinRoom(const SlotPtr sourceSlot) const
 {
-    sourceSlot->GetSession()->Send(OutRoomPacket::CreateAndJoin(*this));
+    auto sourceSession = sourceSlot->GetSession();
+    sourceSession->Send(OutRoomPacket::CreateAndJoin(*this));
+
+    auto hostUser = this->m_Host->GetSession()->GetUser();
+
+    std::string_view connMsg =
+        hostUser->ShouldForceRelayAsHost() ?
+            "This room will use a relay to connect you to the host" :
+            "This room will connect you directly to the host";
+
+    SendSystemMessage(sourceSession, connMsg);
 }
 
 void Room::SendRoomSettings(const SlotPtr sourceSlot) const

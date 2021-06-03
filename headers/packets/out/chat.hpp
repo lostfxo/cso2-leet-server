@@ -7,15 +7,16 @@ class OutChatPacket
 {
 public:
     static PacketBuilder ChannelMessage(std::string_view msg,
-                                        std::string_view sender, bool gm);
+                                        std::string_view sender,
+                                        std::uint8_t vipLevel, bool gm);
     static PacketBuilder DirectMessage(std::string_view msg,
                                        std::string_view sender,
                                        std::string_view receiver,
                                        std::uint8_t vipLevel, bool isReceiver,
                                        bool isGm);
     static PacketBuilder RoomMessage(std::string_view msg,
-                                     std::string_view sender, std::uint8_t vipLevel,
-                                     bool isGm);
+                                     std::string_view sender,
+                                     std::uint8_t vipLevel, bool isGm);
     static PacketBuilder IngameGlobalMessage(std::string_view msg,
                                              std::string_view sender,
                                              std::uint8_t vipLevel, bool isGm);

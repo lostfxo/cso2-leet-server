@@ -9,18 +9,19 @@ inline void WriteChatMsg(DynamicBuffer& pktBuf, std::string_view msg,
     pktBuf.WriteString(sender);
     pktBuf.Write<std::uint8_t>(vipLevel != 0 ? 1 : 0);
     pktBuf.Write<std::uint8_t>(vipLevel);
-    pktBuf.WriteString(msg);
+    pktBuf.WriteLongString(msg);
 }
 
 PacketBuilder OutChatPacket::ChannelMessage(std::string_view msg,
-                                            std::string_view sender, bool gm)
+                                            std::string_view sender,
+                                            std::uint8_t vipLevel, bool gm)
 {
     PacketBuilder res(PacketId::Chat, 512);
     auto& bufRef = res.GetBuffer();
 
     bufRef.Write(std::uint8_t(ChatPacketType::Channel));
     bufRef.Write<std::uint8_t>(gm ? 1 : 0);
-    WriteChatMsg(bufRef, msg, sender, 0);
+    WriteChatMsg(bufRef, msg, sender, vipLevel);
     res.Finish();
 
     return res;
@@ -29,8 +30,8 @@ PacketBuilder OutChatPacket::ChannelMessage(std::string_view msg,
 PacketBuilder OutChatPacket::DirectMessage(std::string_view msg,
                                            std::string_view sender,
                                            std::string_view receiver,
-                                           std::uint8_t vipLevel, bool isReceiver,
-                                           bool isGm)
+                                           std::uint8_t vipLevel,
+                                           bool isReceiver, bool isGm)
 {
     PacketBuilder res(PacketId::Chat, 512);
     auto& bufRef = res.GetBuffer();
@@ -61,7 +62,8 @@ PacketBuilder OutChatPacket::RoomMessage(std::string_view msg,
 
 PacketBuilder OutChatPacket::IngameGlobalMessage(std::string_view msg,
                                                  std::string_view sender,
-                                                 std::uint8_t vipLevel, bool isGm)
+                                                 std::uint8_t vipLevel,
+                                                 bool isGm)
 {
     PacketBuilder res(PacketId::Chat, 512);
     auto& bufRef = res.GetBuffer();

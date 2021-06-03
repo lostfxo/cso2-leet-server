@@ -27,13 +27,18 @@ void OnChatChannelMsgRequest(const InChatPacket& chatPkt,
 
     auto sessionUser = session->GetUser();
 
-    auto outPkt = OutChatPacket::ChannelMessage(chatPkt.Message,
-                                                sessionUser->GetUserName(),
-                                                sessionUser->IsGameMaster());
-
-    for (const auto& session : curChannel->GetSessions())
+    for (const auto& curSess : curChannel->GetSessions())
     {
-        session->Send(std::move(outPkt));
+        if (curSess->IsInRoom() == true)
+        {
+            continue;
+        }
+
+        auto outPkt = OutChatPacket::ChannelMessage(
+            chatPkt.Message, sessionUser->GetUserName(),
+            sessionUser->GetVipLevel(), sessionUser->IsGameMaster());
+
+        curSess->Send(std::move(outPkt));
     }
 }
 
@@ -105,10 +110,18 @@ void OnChatRoomMsgRequest(const InChatPacket& chatPkt, ClientSessionPtr session)
         return;
     }
 
-    auto msgPkt = OutChatPacket::RoomMessage(
-        chatPkt.Message, sessionUser->GetUserName(), sessionUser->GetVipLevel(),
-        sessionUser->IsGameMaster());
-    session->Send(std::move(msgPkt));
+    for (auto slot : curRoom->GetSlots())
+    {
+        if (slot->IsIngame() == true)
+        {
+            continue;
+        }
+
+        auto msgPkt = OutChatPacket::RoomMessage(
+            chatPkt.Message, sessionUser->GetUserName(),
+            sessionUser->GetVipLevel(), sessionUser->IsGameMaster());
+        slot->GetSession()->Send(std::move(msgPkt));
+    }
 }
 
 void OnChatIngameGlobalMsgRequest(const InChatPacket& chatPkt,
@@ -134,12 +147,17 @@ void OnChatIngameGlobalMsgRequest(const InChatPacket& chatPkt,
         return;
     }
 
-    auto msgPkt = OutChatPacket::IngameGlobalMessage(
-        chatPkt.Message, sessionUser->GetUserName(), sessionUser->GetVipLevel(),
-        sessionUser->IsGameMaster());
-
     for (auto slot : curRoom->GetSlots())
     {
+        if (slot->IsIngame() == false)
+        {
+            continue;
+        }
+
+        auto msgPkt = OutChatPacket::IngameGlobalMessage(
+            chatPkt.Message, sessionUser->GetUserName(),
+            sessionUser->GetVipLevel(), sessionUser->IsGameMaster());
+
         slot->GetSession()->Send(std::move(msgPkt));
     }
 }
@@ -170,16 +188,19 @@ void OnChatIngameTeamMsgRequest(const InChatPacket& chatPkt,
     auto sessionSlot = curRoom->FindSlotById(sessionUser->GetId());
     Assert(sessionSlot != nullptr);
 
-    auto msgPkt = OutChatPacket::IngameGlobalMessage(
-        chatPkt.Message, sessionUser->GetUserName(), sessionUser->GetVipLevel(),
-        sessionUser->IsGameMaster());
-
     for (auto slot : curRoom->GetSlots())
     {
-        if (slot->GetTeam() == sessionSlot->GetTeam())
+        if (slot->IsIngame() == false ||
+            slot->GetTeam() != sessionSlot->GetTeam())
         {
-            slot->GetSession()->Send(std::move(msgPkt));
+            continue;
         }
+
+        auto msgPkt = OutChatPacket::IngameTeamMessage(
+            chatPkt.Message, sessionUser->GetUserName(),
+            sessionUser->GetVipLevel(), sessionUser->IsGameMaster());
+
+        slot->GetSession()->Send(std::move(msgPkt));
     }
 }
 
@@ -205,19 +226,19 @@ void OnChatPacketRequest(PacketView& packet, ClientSessionPtr session)
     switch (chatPkt.Type)
     {
         case ChatPacketType::Channel:
-            OnChatChannelMsgRequest(packet, session);
+            OnChatChannelMsgRequest(chatPkt, session);
             break;
         case ChatPacketType::DirectMessage:
-            OnChatDirectMsgRequest(packet, session);
+            OnChatDirectMsgRequest(chatPkt, session);
             break;
         case ChatPacketType::Room:
-            OnChatRoomMsgRequest(packet, session);
+            OnChatRoomMsgRequest(chatPkt, session);
             break;
         case ChatPacketType::IngameGlobal:
-            OnChatIngameGlobalMsgRequest(packet, session);
+            OnChatIngameGlobalMsgRequest(chatPkt, session);
             break;
         case ChatPacketType::IngameTeam:
-            OnChatIngameTeamMsgRequest(packet, session);
+            OnChatIngameTeamMsgRequest(chatPkt, session);
             break;
         default:
             Log::Warning("[OnChatPacketRequest] user {} sent unknown chat "

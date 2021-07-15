@@ -105,6 +105,7 @@ set(LEET_SOURCES_BASE
     "src/services/userservice.cpp"
     "src/system/dialogbox.cpp"
     "src/util/log.cpp"
+    "src/util/randomstring.cpp"
     "src/activesessions.cpp"
     "src/cmdparser.cpp"
     "src/clientsession.cpp"
@@ -263,7 +264,7 @@ if(MSVC)
   target_compile_options(leet-server_static PRIVATE /W4)
 else()
   target_compile_options(leet-server_static PRIVATE -Wall -Wextra -Wconversion
-	  -pedantic -save-temps -MMD)
+                                                    -pedantic)
 endif()
 
 # enable coroutines on gcc

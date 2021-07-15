@@ -158,11 +158,6 @@ ServerOptions GetCmdOptions(const CmdParser& cmd)
     bool shouldLogPackets =
         cmd.HasOption("-L") || cmd.HasOption("--log-packets");
 
-    std::cout << "ipaddress: " << ipAddress << "\n";
-    std::cout << "publicIp: " << publicIp << "\n";
-    std::cout << "publicIp: " << asio::ip::make_address_v4(publicIp).to_uint()
-              << "\n";
-
     return { .Verbosity = logVerb,
              .Hostname = std::move(ipAddress),
              .PublicHostname = std::move(publicIp),

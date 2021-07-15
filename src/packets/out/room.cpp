@@ -1,6 +1,6 @@
 #include "packets/out/room.hpp"
 
-#include <gsl/gsl>
+#include "util/number.hpp"
 
 #include "clientsession.hpp"
 #include "cso2/user.hpp"
@@ -58,7 +58,7 @@ inline void WriteRoomSetTeams(DynamicBuffer& buf,
                                 "have the same number of elements");
     }
 
-    buf.Write(gsl::narrow<std::uint8_t>(userIds.size()));
+    buf.Write(util::FastNarrow<std::uint8_t>(userIds.size()));
 
     for (std::size_t i = 0; i < userIds.size(); i++)
     {
@@ -81,7 +81,7 @@ PacketBuilder OutRoomPacket::CreateAndJoin(const Room& room)
     buf.Write<std::uint8_t>(2);  // unk01
     buf.Write<std::uint8_t>(2);  // unk02
 
-    buf.Write(gsl::narrow<std::uint16_t>(room.GetId()));  // roomId
+    buf.Write(util::FastNarrow<std::uint16_t>(room.GetId()));  // roomId
 
     buf.Write<std::uint8_t>(5);  // unk04
 
@@ -219,7 +219,7 @@ PacketBuilder OutRoomPacket::CreateAndJoin(const Room& room)
 
     const auto& slots = room.GetSlots();
 
-    buf.Write(gsl::narrow<std::uint8_t>(slots.size()));  // numOfPlayers
+    buf.Write(util::FastNarrow<std::uint8_t>(slots.size()));  // numOfPlayers
 
     for (auto s : slots)
     {
@@ -360,7 +360,7 @@ PacketBuilder OutRoomPacket::UpdateSettings(const RoomSettings& settings)
     {
         const auto& multiMaps = settings.GetMultiMaps();
 
-        buf.Write(gsl::narrow<std::uint8_t>(multiMaps.size()));
+        buf.Write(util::FastNarrow<std::uint8_t>(multiMaps.size()));
         for (const auto map : multiMaps)
         {
             buf.Write<std::uint8_t>(map);

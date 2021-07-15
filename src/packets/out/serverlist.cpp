@@ -1,6 +1,6 @@
 #include "packets/out/serverlist.hpp"
 
-#include <gsl/gsl>
+#include "util/number.hpp"
 
 #include "channel/channel.hpp"
 #include "channel/channelgroup.hpp"
@@ -28,7 +28,7 @@ inline void WriteServerItem(DynamicBuffer& pktBuf, std::string_view serverName,
     pktBuf.Write<std::uint8_t>(serverStatus);
     pktBuf.Write<std::uint8_t>(serverType);
     pktBuf.WriteString(serverName);
-    pktBuf.Write(gsl::narrow<std::uint8_t>(channels.size()));
+    pktBuf.Write(util::FastNarrow<std::uint8_t>(channels.size()));
 
     for (const auto& channel : channels)
     {
@@ -42,7 +42,7 @@ PacketBuilder OutServerListPacket::ServerList(const ChannelGroupsArray groups)
     PacketBuilder res(PacketId::ServerList, 256);
     auto& bufRef = res.GetBuffer();
 
-    bufRef.Write(gsl::narrow<std::uint8_t>(groups.size()));
+    bufRef.Write(util::FastNarrow<std::uint8_t>(groups.size()));
 
     for (const auto& group : groups)
     {

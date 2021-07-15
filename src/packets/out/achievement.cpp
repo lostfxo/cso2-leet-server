@@ -1,6 +1,6 @@
 #include "packets/out/achievement.hpp"
 
-#include <gsl/gsl>
+#include "util/number.hpp"
 
 #include "packets/achievementshared.hpp"
 
@@ -49,7 +49,7 @@ PacketBuilder OutAchievementPacket::UpdateCampaign(
     if (flags & 0x40)
     {
         auto items = options.GetRewardItems();
-        bufRef.Write(gsl::narrow<uint8_t>(items.size()));
+        bufRef.Write(util::FastNarrow<uint8_t>(items.size()));
 
         for (const auto& item : items)
         {

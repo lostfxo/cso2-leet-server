@@ -1,13 +1,13 @@
 #include "packets/out/option.hpp"
 
-#include <gsl/gsl>
+#include "util/number.hpp"
 
 #include "cso2/buymenu.hpp"
 #include "packets/optionshared.hpp"
 
 void WriteBuyCategory(DynamicBuffer& buf, const cso2::BuyCategory& category)
 {
-    buf.Write(gsl::narrow<std::uint8_t>(category.size()));
+    buf.Write(util::FastNarrow<std::uint8_t>(category.size()));
 
     std::uint8_t nextItemIndex = 0;
 

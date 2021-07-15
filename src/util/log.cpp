@@ -2,7 +2,7 @@
 
 #include <filesystem>
 #include <fstream>
-#include <gsl/gsl>
+#include "util/number.hpp"
 #include <iostream>
 #include <string>
 
@@ -45,7 +45,7 @@ void WriteToFile(const std::string& msg)
 
     if (os.is_open() == true)
     {
-        os.write(msg.data(), gsl::narrow<std::uint32_t>(msg.length()));
+        os.write(msg.data(), util::FastNarrow<std::uint32_t>(msg.length()));
     }
 
     os.close();

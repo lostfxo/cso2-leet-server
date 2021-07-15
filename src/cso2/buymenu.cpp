@@ -1,15 +1,15 @@
 #include "cso2/buymenu.hpp"
 
-#include <gsl/gsl>
+#include "util/number.hpp"
 
 namespace cso2
 {
 BuyMenu::BuyMenu(const json::value& jv)
 {
-    this->m_OwnerId = gsl::narrow<std::uint32_t>(jv.at("owner_id").as_int64());
+    this->m_OwnerId = util::FastNarrow<std::uint32_t>(jv.at("owner_id").as_int64());
 
     auto arrayTransform = [](const json::value v) -> std::uint32_t {
-        return gsl::narrow<std::uint32_t>(v.as_int64());
+        return util::FastNarrow<std::uint32_t>(v.as_int64());
     };
 
     const auto& pistols = jv.at("pistols").as_array();

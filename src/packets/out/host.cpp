@@ -1,6 +1,6 @@
 #include "packets/out/host.hpp"
 
-#include <gsl/gsl>
+#include "util/number.hpp"
 
 #include "cso2/buymenu.hpp"
 #include "cso2/cosmetics.hpp"
@@ -26,7 +26,7 @@ inline void WriteBuySubMenu(DynamicBuffer& buf, const cso2::BuyCategory& items)
 {
     std::uint8_t curItem = 0;
 
-    buf.Write(gsl::narrow<std::uint8_t>(items.size()));
+    buf.Write(util::FastNarrow<std::uint8_t>(items.size()));
 
     for (auto item : items)
     {
@@ -122,7 +122,7 @@ PacketBuilder OutHostPacket::SetInventory(
     buf.Write<std::uint32_t>(userId);
     // writes somewhere to CGameClient
     buf.Write<std::uint8_t>(0);  // unk00
-    buf.Write(gsl::narrow<std::uint16_t>(items.size()));
+    buf.Write(util::FastNarrow<std::uint16_t>(items.size()));
 
     for (const auto& item : items)
     {

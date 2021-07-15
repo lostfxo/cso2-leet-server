@@ -1,6 +1,6 @@
 #include "packets/out/unlock.hpp"
 
-#include <gsl/gsl>
+#include "util/number.hpp"
 
 PacketBuilder OutUnlockPacket::SetUnlocks(
     const std::span<cso2::UnlockItem> items,
@@ -12,7 +12,7 @@ PacketBuilder OutUnlockPacket::SetUnlocks(
     buf.Write(std::uint8_t(UnlockPacketType::SetUnlocked));
 
     // build unlock weapons info
-    buf.Write(gsl::narrow<std::uint16_t>(items.size()));
+    buf.Write(util::FastNarrow<std::uint16_t>(items.size()));
 
     std::uint32_t nextItemIndex = 1;
 
@@ -25,7 +25,7 @@ PacketBuilder OutUnlockPacket::SetUnlocks(
     }
 
     // build killNum
-    buf.Write(gsl::narrow<std::uint16_t>(progresses.size()));
+    buf.Write(util::FastNarrow<std::uint16_t>(progresses.size()));
 
     for (const auto& progress : progresses)
     {

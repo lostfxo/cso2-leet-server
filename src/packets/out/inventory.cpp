@@ -1,8 +1,7 @@
 #include "packets/out/inventory.hpp"
 
-#include <gsl/gsl>
-
 #include "cso2/inventory.hpp"
+#include "util/number.hpp"
 
 inline void WriteInventoryItem(DynamicBuffer& buf, std::uint32_t id,
                                std::uint16_t ammount, std::uint16_t index)
@@ -22,14 +21,14 @@ PacketBuilder OutInventoryPacket::Create(cso2::InventoryPtr inv)
     auto& bufRef = res.GetBuffer();
 
     const auto& items = inv->GetItems();
+    auto numItems = util::FastNarrow<std::uint16_t>(items.size());
 
-    bufRef.Write(gsl::narrow<std::uint16_t>(items.size()));
+    bufRef.Write(numItems);
 
-    std::uint16_t nextItemIndex = 0;
-
-    for (const auto& item : items)
+    for (std::uint16_t i = 0; i < numItems; i++)
     {
-        WriteInventoryItem(bufRef, item.ItemId, item.Ammount, nextItemIndex++);
+        const auto& item = items[i];
+        WriteInventoryItem(bufRef, item.ItemId, item.Ammount, i);
     }
 
     res.Finish();
@@ -43,13 +42,14 @@ PacketBuilder OutInventoryPacket::AddItems(
     PacketBuilder res(PacketId::Inventory_Create, 1024);
     auto& bufRef = res.GetBuffer();
 
-    bufRef.Write(gsl::narrow<std::uint16_t>(items.size()));
+    auto numItems = util::FastNarrow<std::uint16_t>(items.size());
 
-    std::uint16_t nextItemIndex = 0;
+    bufRef.Write(numItems);
 
-    for (const auto& item : items)
+    for (std::uint16_t i = 0; i < numItems; i++)
     {
-        WriteInventoryItem(bufRef, item.ItemId, item.Ammount, nextItemIndex++);
+        const auto& item = items[i];
+        WriteInventoryItem(bufRef, item.ItemId, item.Ammount, i);
     }
 
     res.Finish();

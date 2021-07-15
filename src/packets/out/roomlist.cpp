@@ -1,6 +1,6 @@
 #include "packets/out/roomlist.hpp"
 
-#include <gsl/gsl>
+#include "util/number.hpp"
 
 #include "room/room.hpp"
 
@@ -11,7 +11,7 @@ enum class OutRoomListType
 
 inline void WriteRoomListItem(DynamicBuffer& pktBuf, RoomPtr room)
 {
-    pktBuf.Write(gsl::narrow<std::uint16_t>(room->GetId()));  // roomId
+    pktBuf.Write(util::FastNarrow<std::uint16_t>(room->GetId()));  // roomId
     pktBuf.Write<std::uint64_t>(0xFFFFFFFFFFFFFFFF);          // flags
 
     // flags & 0x1
@@ -20,7 +20,7 @@ inline void WriteRoomListItem(DynamicBuffer& pktBuf, RoomPtr room)
     // flags & 0x2
 
     // TODO: this should be fine if it overflows right?
-    pktBuf.Write(gsl::narrow_cast<uint8_t>(room->GetId()));  // roomNumber
+    pktBuf.Write(util::FastNarrow<uint8_t>(room->GetId()));  // roomNumber
 
     // end flags & 0x2
     // flags & 0x4
@@ -39,7 +39,7 @@ inline void WriteRoomListItem(DynamicBuffer& pktBuf, RoomPtr room)
     // end flags & 0x20
     // flags & 0x40
     pktBuf.Write(
-        gsl::narrow<std::uint8_t>(room->GetSlots().size()));  // numPlayers
+        util::FastNarrow<std::uint8_t>(room->GetSlots().size()));  // numPlayers
     // end flags & 0x40
     // flags & 0x80
     pktBuf.Write<std::uint8_t>(
@@ -152,7 +152,7 @@ inline void WriteRoomListItem(DynamicBuffer& pktBuf, RoomPtr room)
 inline void WriteRoomListCollection(DynamicBuffer& pktBuf,
                                     const RoomList& rooms)
 {
-    pktBuf.Write(gsl::narrow<std::uint16_t>(rooms.size()));
+    pktBuf.Write(util::FastNarrow<std::uint16_t>(rooms.size()));
 
     for (const auto& room : rooms)
     {

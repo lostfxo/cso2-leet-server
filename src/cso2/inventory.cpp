@@ -1,6 +1,6 @@
 #include "cso2/inventory.hpp"
 
-#include <gsl/gsl>
+#include "util/number.hpp"
 #include <iterator>
 
 namespace cso2
@@ -8,7 +8,7 @@ namespace cso2
 Inventory::Inventory(const json::value& jv)
 {
     this->m_OwnerId =
-        gsl::narrow_cast<std::uint32_t>(jv.at("owner_id").as_int64());
+        util::FastNarrow<std::uint32_t>(jv.at("owner_id").as_int64());
 
     const auto& items = jv.at("items").as_array();
     this->m_Items.reserve(items.size());

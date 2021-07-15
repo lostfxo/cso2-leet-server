@@ -1,6 +1,6 @@
 #include "packets/builder.hpp"
 
-#include <gsl/gsl>
+#include "util/number.hpp"
 #include <stdexcept>
 
 PacketBuilder::PacketBuilder(PacketId id, std::size_t initialSize /*= 0*/)
@@ -37,6 +37,6 @@ void PacketBuilder::SetLength(std::uint16_t len)
 
 void PacketBuilder::Finish()
 {
-    this->SetLength(gsl::narrow<std::uint16_t>(this->m_Buffer.GetCurOffset() -
+    this->SetLength(util::FastNarrow<std::uint16_t>(this->m_Buffer.GetCurOffset() -
                                                GAME_PACKET_HEADER_LENGTH + 1));
 }

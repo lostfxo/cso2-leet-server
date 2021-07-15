@@ -30,7 +30,7 @@ constexpr const auto CLIENT_WELCOME_MESSAGE = "~SERVERCONNECTED\n\0"sv;
 ClientSession::ClientSession(tcp::socket socket,
                              std::shared_ptr<PacketLogger> logger /*= nullptr*/)
     : m_Socket(std::move(socket)), m_WriteTimer(socket.get_executor()),
-      m_UniqueId(GenerateRandomString<16>()), m_User(nullptr),
+      m_UniqueId(GenerateRandomString(16)), m_User(nullptr),
       m_CurChannel(nullptr), m_CurRoom(nullptr), m_Logger(logger),
       m_LoggerNextInSequence(0), m_LoggerNextOutSequence(0),
       m_CachedRemoteIp(0), m_NextSequence(0), m_Initialized(false)

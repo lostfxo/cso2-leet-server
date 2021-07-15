@@ -83,7 +83,6 @@ docker run leet-server
 - [Boost](https://www.boost.org/)
 - [Catch2](https://github.com/catchorg/Catch2)
 - [fmt](https://github.com/fmtlib/fmt)
-- [gsl-lite](https://github.com/gsl-lite/gsl-lite)
 
 ## License
 

@@ -13,7 +13,6 @@ option(LEET_BUILD_TESTS "Build tests" OFF)
 set(LEET_ROOT_DIR "${PROJECT_SOURCE_DIR}")
 set(LEET_LIBS_DIR "${LEET_ROOT_DIR}/external")
 set(LEET_LIB_FMT_DIR "${LEET_LIBS_DIR}/fmt")
-set(LEET_LIB_GSL_DIR "${LEET_LIBS_DIR}/gsl-lite")
 set(LEET_LIB_JSON_DIR "${LEET_LIBS_DIR}/json")
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -208,6 +207,7 @@ set(LEET_HEADERS_BASE
     "src/util/fs.hpp"
     "src/util/json_conv.hpp"
     "src/util/log.hpp"
+    "src/util/number.hpp"
     "src/util/randomstring.hpp"
     "src/activesessions.hpp"
     "src/cmdparser.hpp"
@@ -240,9 +240,6 @@ find_package(Boost 1.73.0 REQUIRED)
 
 # fmt
 add_subdirectory("${LEET_LIB_FMT_DIR}")
-
-# gsl
-add_subdirectory("${LEET_LIB_GSL_DIR}")
 
 #
 # Add a static library to be shared between the main executable and the test
@@ -294,8 +291,7 @@ target_include_directories(leet-server PRIVATE "src" ${Boost_INCLUDE_DIRS}
 #
 # link libraries
 #
-target_link_libraries(leet-server_static fmt::fmt gsl::gsl-lite-v1
-                      Threads::Threads)
+target_link_libraries(leet-server_static fmt::fmt Threads::Threads)
 target_link_libraries(leet-server leet-server_static)
 
 #

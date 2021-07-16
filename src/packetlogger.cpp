@@ -1,6 +1,10 @@
 #include "packetlogger.hpp"
 
+#include "util/fs.hpp"
 #include "util/log.hpp"
+
+static fs::path g_InPath;
+static fs::path g_OutPath;
 
 inline void WriteToFile(const std::span<const std::uint8_t> buffer,
                         const fs::path& path)
@@ -30,49 +34,51 @@ inline std::string PadNumber(std::uint32_t n)
     return res;
 }
 
-PacketLogger::PacketLogger()
+void PacketLogger::Init()
 {
+    Log::Info("[PacketLogger::Init] packet logging is enabled\n");
+
     auto curPath = fs::current_path();
-    this->m_InPath = curPath / "packets/in";
-    this->m_OutPath = curPath / "packets/out";
+    g_InPath = curPath / "packets/in";
+    g_OutPath = curPath / "packets/out";
 
-    Log::Info("PacketLogger: using {} as in path\n",
-              this->m_InPath.generic_string());
-    Log::Info("PacketLogger: using {} as out path\n",
-              this->m_OutPath.generic_string());
+    Log::Info("[PacketLogger::Init] using {} as in path\n",
+              g_InPath.generic_string());
+    Log::Info("[PacketLogger::Init] using {} as out path\n",
+              g_OutPath.generic_string());
 
-    fs::create_directories(this->m_InPath);
-    fs::create_directories(this->m_OutPath);
+    fs::create_directories(g_InPath);
+    fs::create_directories(g_OutPath);
 
-    if (fs::is_empty(this->m_InPath) == false)
+    if (fs::is_empty(g_InPath) == false)
     {
-        Log::Warning("PacketLogger: cleaning {}\n",
-                     this->m_InPath.generic_string());
-        ClearDirectory(this->m_InPath);
+        Log::Warning("[PacketLogger::Init] cleaning {}\n",
+                     g_InPath.generic_string());
+        ClearDirectory(g_InPath);
     }
 
-    if (fs::is_empty(this->m_OutPath) == false)
+    if (fs::is_empty(g_OutPath) == false)
     {
-        Log::Warning("PacketLogger: cleaning {}\n",
-                     this->m_OutPath.generic_string());
-        ClearDirectory(this->m_OutPath);
+        Log::Warning("[PacketLogger::Init] cleaning {}\n",
+                     g_OutPath.generic_string());
+        ClearDirectory(g_OutPath);
     }
 }
 
 void PacketLogger::OnInPacket(std::string_view connUuid, std::uint32_t seq,
                               std::uint32_t packetId,
-                              const std::span<const std::uint8_t> packetData) const
+                              const std::span<const std::uint8_t> packetData)
 {
-    auto writePath = this->m_InPath / fmt::format("{}_{}-{}", connUuid,
-                                                  PadNumber(seq), packetId);
+    auto writePath =
+        g_InPath / fmt::format("{}_{}-{}", connUuid, PadNumber(seq), packetId);
     WriteToFile(packetData, writePath);
 }
 
 void PacketLogger::OnOutPacket(std::string_view connUuid, std::uint32_t seq,
                                std::uint32_t packetId,
-                               const std::span<const std::uint8_t> packetData) const
+                               const std::span<const std::uint8_t> packetData)
 {
-    auto writePath = this->m_OutPath / fmt::format("{}_{}-{}", connUuid,
-                                                   PadNumber(seq), packetId);
+    auto writePath =
+        g_OutPath / fmt::format("{}_{}-{}", connUuid, PadNumber(seq), packetId);
     WriteToFile(packetData, writePath);
 }

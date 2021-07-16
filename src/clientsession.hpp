@@ -20,7 +20,6 @@ namespace asio = boost::asio;
 using boost::asio::awaitable;
 using boost::asio::ip::tcp;
 
-class PacketLogger;
 class Room;
 
 class PacketBuilder;
@@ -41,8 +40,7 @@ struct SessionNetInfo
 class ClientSession : public std::enable_shared_from_this<ClientSession>
 {
 public:
-    ClientSession(tcp::socket socket,
-                  std::shared_ptr<PacketLogger> logger = nullptr);
+    ClientSession(tcp::socket socket);
     ~ClientSession();
 
     void Initialize();
@@ -50,96 +48,75 @@ public:
     void Send(PacketBuilder&& pkt);
     void SendData(std::vector<std::uint8_t>&& data);
 
-    [[nodiscard]] inline std::string_view GetUniqueId() const noexcept
-    {
-        return this->m_UniqueId;
-    }
+    inline std::string_view GetUniqueId() const { return this->m_UniqueId; }
 
-    [[nodiscard]] inline cso2::UserPtr GetUser() const noexcept
-    {
-        return this->m_User;
-    }
+    inline cso2::UserPtr GetUser() const { return this->m_User; }
 
-    [[nodiscard]] inline bool HasUser() const noexcept
-    {
-        return this->m_User != nullptr;
-    }
+    inline bool HasUser() const { return this->m_User != nullptr; }
 
-    [[nodiscard]] inline ChannelPtr GetCurChannel() const noexcept
-    {
-        return this->m_CurChannel;
-    }
+    inline ChannelPtr GetCurChannel() const { return this->m_CurChannel; }
 
-    [[nodiscard]] inline bool IsInChannel() const noexcept
-    {
-        return this->m_CurChannel != nullptr;
-    }
+    inline bool IsInChannel() const { return this->m_CurChannel != nullptr; }
 
-    [[nodiscard]] inline std::shared_ptr<Room> GetCurRoom() const noexcept
-    {
-        return this->m_CurRoom;
-    }
+    inline std::shared_ptr<Room> GetCurRoom() const { return this->m_CurRoom; }
 
-    [[nodiscard]] inline bool IsInRoom() const noexcept
-    {
-        return this->m_CurRoom != nullptr;
-    }
+    inline bool IsInRoom() const { return this->m_CurRoom != nullptr; }
 
-    [[nodiscard]] inline std::uint32_t GetInternalAddress() const noexcept
+    inline std::uint32_t GetInternalAddress() const
     {
         return this->m_InternalNetInfo.IpAddress;
     }
 
-    [[nodiscard]] inline std::uint16_t GetInternalClientPort() const noexcept
+    inline std::uint16_t GetInternalClientPort() const
     {
         return this->m_InternalNetInfo.ClientPort;
     }
 
-    [[nodiscard]] inline std::uint16_t GetInternalServerPort() const noexcept
+    inline std::uint16_t GetInternalServerPort() const
     {
         return this->m_InternalNetInfo.ServerPort;
     }
 
-    [[nodiscard]] inline std::uint16_t GetInternalTvPort() const noexcept
+    inline std::uint16_t GetInternalTvPort() const
     {
         return this->m_InternalNetInfo.SourceTvPort;
     }
 
-    [[nodiscard]] inline std::uint32_t GetExternalAddress() const noexcept
+    inline std::uint32_t GetExternalAddress() const
     {
         return this->m_CachedRemoteIp;
     }
 
-    [[nodiscard]] inline std::uint16_t GetExternalClientPort() const noexcept
+    inline std::uint16_t GetExternalClientPort() const
     {
         return this->m_ExternalNetInfo.ClientPort;
     }
 
-    [[nodiscard]] inline std::uint16_t GetExternalServerPort() const noexcept
+    inline std::uint16_t GetExternalServerPort() const
     {
         return this->m_ExternalNetInfo.ServerPort;
     }
 
-    [[nodiscard]] inline std::uint16_t GetExternalTvPort() const noexcept
+    inline std::uint16_t GetExternalTvPort() const
     {
         return this->m_ExternalNetInfo.SourceTvPort;
     }
 
-    inline void SetUser(cso2::UserPtr user) noexcept { this->m_User = user; }
+    inline void SetUser(cso2::UserPtr user) { this->m_User = user; }
 
-    inline void SetCurChannel(ChannelPtr channel) noexcept
+    inline void SetCurChannel(ChannelPtr channel)
     {
         this->m_CurChannel = channel;
     }
 
-    inline void SetCurRoom(std::shared_ptr<Room> room) noexcept
+    inline void SetCurRoom(std::shared_ptr<Room> room)
     {
         this->m_CurRoom = room;
     }
 
     bool UpdateHolepunch(std::uint32_t internalIp, std::uint32_t externalIp,
                          std::uint16_t localPort, std::uint16_t externalPort,
-                         HolepunchPortId portId) noexcept;
+                         HolepunchPortId portId);
 
 protected:
     awaitable<std::uint64_t> ProcessData(
@@ -151,7 +128,7 @@ private:
 
     awaitable<void> Stop(const std::exception& exception);
 
-    [[nodiscard]] inline std::uint8_t GetNextSeq() noexcept
+    inline std::uint8_t GetNextSeq()
     {
         if (this->m_NextSequence == 255)
         {
@@ -161,18 +138,6 @@ private:
 
         return this->m_NextSequence++;
     }
-
-    [[nodiscard]] inline std::uint32_t GetLoggerNextInSeq() noexcept
-    {
-        return this->m_LoggerNextInSequence++;
-    }
-
-    [[nodiscard]] inline std::uint32_t GetLoggerNextOutSeq() noexcept
-    {
-        return this->m_LoggerNextOutSequence++;
-    }
-
-    void LogPacketData(const std::span<const std::uint8_t> data);
 
 private:
     tcp::socket m_Socket;
@@ -185,7 +150,6 @@ private:
     ChannelPtr m_CurChannel;
     std::shared_ptr<Room> m_CurRoom;
 
-    std::shared_ptr<PacketLogger> m_Logger;
     std::uint32_t m_LoggerNextInSequence;
     std::uint32_t m_LoggerNextOutSequence;
 

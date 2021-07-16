@@ -13,6 +13,7 @@
 #include "packets/builder.hpp"
 #include "packets/view.hpp"
 #include "room/room.hpp"
+#include "serveroptions.hpp"
 #include "services/userservice.hpp"
 #include "util/log.hpp"
 #include "util/randomstring.hpp"
@@ -27,13 +28,12 @@ using namespace std::literals::string_view_literals;
 
 constexpr const auto CLIENT_WELCOME_MESSAGE = "~SERVERCONNECTED\n\0"sv;
 
-ClientSession::ClientSession(tcp::socket socket,
-                             std::shared_ptr<PacketLogger> logger /*= nullptr*/)
+ClientSession::ClientSession(tcp::socket socket)
     : m_Socket(std::move(socket)), m_WriteTimer(socket.get_executor()),
       m_UniqueId(GenerateRandomString(16)), m_User(nullptr),
-      m_CurChannel(nullptr), m_CurRoom(nullptr), m_Logger(logger),
-      m_LoggerNextInSequence(0), m_LoggerNextOutSequence(0),
-      m_CachedRemoteIp(0), m_NextSequence(0), m_Initialized(false)
+      m_CurChannel(nullptr), m_CurRoom(nullptr), m_LoggerNextInSequence(0),
+      m_LoggerNextOutSequence(0), m_CachedRemoteIp(0), m_NextSequence(0),
+      m_Initialized(false)
 {
     this->m_WriteTimer.expires_at(std::chrono::steady_clock::time_point::max());
     this->m_CachedRemoteIp =
@@ -78,7 +78,14 @@ void ClientSession::Send(PacketBuilder&& pkt)
 
     auto data = pkt.GetBufferOwnership();
 
-    this->LogPacketData(data);
+    if (g_ServerOptions.ShouldLogPackets)
+    {
+        PacketView packet(data);
+        PacketLogger::OnOutPacket(this->GetUniqueId(),
+                                  this->m_LoggerNextOutSequence++,
+                                  std::uint32_t(packet.GetId()), data);
+    }
+
     this->SendData(std::move(data));
 }
 
@@ -96,10 +103,10 @@ awaitable<std::uint64_t> ClientSession::ProcessData(
         PacketView packet(data);
         std::size_t fullPktLen = packet.GetLength() + BASE_PACKET_HEADER_LENGTH;
 
-        if (this->m_Logger != nullptr)
+        if (g_ServerOptions.ShouldLogPackets)
         {
-            this->m_Logger->OnInPacket(
-                this->GetUniqueId(), this->GetLoggerNextInSeq(),
+            PacketLogger::OnInPacket(
+                this->GetUniqueId(), this->m_LoggerNextInSequence++,
                 std::uint32_t(packet.GetId()), { data.data(), fullPktLen });
         }
 
@@ -241,17 +248,6 @@ awaitable<void> ClientSession::AsyncWriteLoop()
     }
 }
 
-void ClientSession::LogPacketData(const std::span<const std::uint8_t> data)
-{
-    if (this->m_Logger != nullptr)
-    {
-        PacketView packet(data);
-        this->m_Logger->OnOutPacket(this->GetUniqueId(),
-                                    this->GetLoggerNextOutSeq(),
-                                    std::uint32_t(packet.GetId()), data);
-    }
-}
-
 awaitable<void> ClientSession::Stop(const std::exception& exception)
 {
     this->m_WriteTimer.cancel();
@@ -276,7 +272,7 @@ bool ClientSession::UpdateHolepunch(std::uint32_t internalIp,
                                     std::uint32_t externalIp,
                                     std::uint16_t localPort,
                                     std::uint16_t externalPort,
-                                    HolepunchPortId portId) noexcept
+                                    HolepunchPortId portId)
 {
     this->m_InternalNetInfo.IpAddress = internalIp;
     this->m_ExternalNetInfo.IpAddress = externalIp;

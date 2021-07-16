@@ -9,6 +9,7 @@
 
 #include "cmdparser.hpp"
 #include "holepunchserver.hpp"
+#include "packetlogger.hpp"
 #include "platform.hpp"
 #include "serverinstance.hpp"
 #include "serveroptions.hpp"
@@ -228,6 +229,11 @@ int main(int argc, char* argv[])
 
         Log::SetVerbosity(g_ServerOptions.Verbosity);
 
+        if (g_ServerOptions.ShouldLogPackets)
+        {
+            PacketLogger::Init();
+        }
+
         asio::io_context io_context;
 
         auto hostIp = asio::ip::make_address_v4(g_ServerOptions.Hostname);
@@ -239,8 +245,7 @@ int main(int argc, char* argv[])
             g_ServerOptions.UserSvcHost,
             std::to_string(g_ServerOptions.UserSvcPort), io_context);
 
-        ServerInstance server(io_context, endpoint,
-                              g_ServerOptions.ShouldLogPackets);
+        ServerInstance server(io_context, endpoint);
         HolepunchServer holepunchServer(io_context, holepunchEndpoint);
 
         asio::signal_set signals(io_context, SIGINT, SIGTERM);

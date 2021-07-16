@@ -65,6 +65,8 @@ enum class CosmeticSlot
     SprayItem = 7,
 };
 
+std::string_view GetCosmeticSlotKeyString(cso2::CosmeticSlot slot);
+
 enum class GameMode : std::uint8_t
 {
     original = 1,
@@ -145,6 +147,8 @@ enum class LoadoutSlot : std::uint8_t
     Smoke = 4,
     Flash = 5,
 };
+
+std::string_view GetLoadoutSlotKeyString(cso2::LoadoutSlot slot);
 
 enum class SlotStatus : std::uint8_t
 {

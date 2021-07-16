@@ -32,6 +32,7 @@ set(LEET_SOURCES_BASE
     "src/channel/shared.cpp"
     "src/cso2/buymenu.cpp"
     "src/cso2/cosmetics.cpp"
+    "src/cso2/definitions.cpp"
     "src/cso2/inventory.cpp"
     "src/cso2/loadout.cpp"
     "src/cso2/user.cpp"

@@ -66,54 +66,6 @@ inline auto BuildPutJsonRequest(std::string target, const json::value& data)
     return req;
 }
 
-inline std::string_view GetCosmeticSlotKeyString(cso2::CosmeticSlot slot)
-{
-    switch (slot)
-    {
-        case cso2::CosmeticSlot::CtItem:
-            return "ct_item"sv;
-        case cso2::CosmeticSlot::TerItem:
-            return "ter_item"sv;
-        case cso2::CosmeticSlot::HeadItem:
-            return "head_item"sv;
-        case cso2::CosmeticSlot::GloveItem:
-            return "glove_item"sv;
-        case cso2::CosmeticSlot::BackItem:
-            return "back_item"sv;
-        case cso2::CosmeticSlot::StepsItem:
-            return "steps_item"sv;
-        case cso2::CosmeticSlot::CardItem:
-            return "card_item"sv;
-        case cso2::CosmeticSlot::SprayItem:
-            return "spray_item"sv;
-        default:
-            throw std::runtime_error(
-                "[GetCosmeticSlotKeyString] unknown slot used");
-    }
-}
-
-inline std::string_view GetLoadoutSlotKeyString(cso2::LoadoutSlot slot)
-{
-    switch (slot)
-    {
-        case cso2::LoadoutSlot::PrimaryWeapon:
-            return "primary_weapon"sv;
-        case cso2::LoadoutSlot::SecondaryWeapon:
-            return "secondary_weapon"sv;
-        case cso2::LoadoutSlot::Melee:
-            return "melee"sv;
-        case cso2::LoadoutSlot::HeGrenade:
-            return "hegrenade"sv;
-        case cso2::LoadoutSlot::Smoke:
-            return "smoke"sv;
-        case cso2::LoadoutSlot::Flash:
-            return "flash"sv;
-        default:
-            throw std::runtime_error(
-                "[GetLoadoutSlotKeyString] unknown slot used");
-    }
-}
-
 inline awaitable<bool> MakeUserUpdateRequest(
     asio::strand<asio::io_context::executor_type>& ioExecutor,
     tcp::resolver::results_type resolvedHost, std::uint32_t userId,
@@ -676,7 +628,7 @@ awaitable<bool> UserService::SetCosmeticSlot(std::uint32_t ownerId,
         beast::tcp_stream stream(this->m_IoExecutor);
         co_await stream.async_connect(this->m_ResolvedHost, use_awaitable);
 
-        json::value requestData = { { GetCosmeticSlotKeyString(slot),
+        json::value requestData = { { cso2::GetCosmeticSlotKeyString(slot),
                                       itemId } };
         auto req = BuildPutJsonRequest(
             fmt::format("/inventory/{}/cosmetics", ownerId), requestData);
@@ -710,7 +662,8 @@ awaitable<bool> UserService::SetLoadoutWeapon(std::uint32_t ownerId,
         beast::tcp_stream stream(this->m_IoExecutor);
         co_await stream.async_connect(this->m_ResolvedHost, use_awaitable);
 
-        json::value requestData = { { GetLoadoutSlotKeyString(slot), itemId } };
+        json::value requestData = { { cso2::GetLoadoutSlotKeyString(slot),
+                                      itemId } };
         auto req = BuildPutJsonRequest(
             fmt::format("/inventory/{}/loadout/{}", ownerId, loadoutNum),
             requestData);

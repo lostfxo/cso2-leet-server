@@ -1,15 +1,20 @@
 #include "cso2/cosmetics.hpp"
 
+#include <boost/json/value.hpp>
+
 #include "util/number.hpp"
 
 namespace cso2
 {
-Cosmetics::Cosmetics(const json::value& jv)
+Cosmetics::Cosmetics(const boost::json::value& jv)
 {
-    this->m_OwnerId = util::FastNarrow<std::uint32_t>(jv.at("owner_id").as_int64());
+    this->m_OwnerId =
+        util::FastNarrow<std::uint32_t>(jv.at("owner_id").as_int64());
 
-    this->m_CtItem = util::FastNarrow<std::uint32_t>(jv.at("ct_item").as_int64());
-    this->m_TerItem = util::FastNarrow<std::uint32_t>(jv.at("ter_item").as_int64());
+    this->m_CtItem =
+        util::FastNarrow<std::uint32_t>(jv.at("ct_item").as_int64());
+    this->m_TerItem =
+        util::FastNarrow<std::uint32_t>(jv.at("ter_item").as_int64());
     this->m_HeadItem =
         util::FastNarrow<std::uint32_t>(jv.at("head_item").as_int64());
     this->m_GloveItem =

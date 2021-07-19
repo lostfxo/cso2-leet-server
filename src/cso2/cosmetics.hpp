@@ -3,55 +3,26 @@
 
 #include "cso2/shared.hpp"
 
-#include <boost/json/value.hpp>
-
-namespace json = boost::json;
+#include "util/json_fwd.hpp"
 
 namespace cso2
 {
 class Cosmetics
 {
 public:
-    Cosmetics() = delete;
-    Cosmetics(const Cosmetics&) = delete;
-
-    explicit Cosmetics(const json::value& jv);
+    explicit Cosmetics(const boost::json::value& jv);
     ~Cosmetics() = default;
 
-    [[nodiscard]] std::uint32_t GetOwnerId() const noexcept
-    {
-        return this->m_OwnerId;
-    }
+    std::uint32_t GetOwnerId() const { return this->m_OwnerId; }
 
-    [[nodiscard]] std::uint32_t GetCtItem() const noexcept { return this->m_CtItem; }
-    [[nodiscard]] std::uint32_t GetTerItem() const noexcept
-    {
-        return this->m_TerItem;
-    }
-    [[nodiscard]] std::uint32_t GetHeadItem() const noexcept
-    {
-        return this->m_HeadItem;
-    }
-    [[nodiscard]] std::uint32_t GetGloveItem() const noexcept
-    {
-        return this->m_GloveItem;
-    }
-    [[nodiscard]] std::uint32_t GetBackItem() const noexcept
-    {
-        return this->m_BackItem;
-    }
-    [[nodiscard]] std::uint32_t GetStepsItem() const noexcept
-    {
-        return this->m_StepsItem;
-    }
-    [[nodiscard]] std::uint32_t GetCardItem() const noexcept
-    {
-        return this->m_CardItem;
-    }
-    [[nodiscard]] std::uint32_t GetSprayItem() const noexcept
-    {
-        return this->m_SprayItem;
-    }
+    std::uint32_t GetCtItem() const { return this->m_CtItem; }
+    std::uint32_t GetTerItem() const { return this->m_TerItem; }
+    std::uint32_t GetHeadItem() const { return this->m_HeadItem; }
+    std::uint32_t GetGloveItem() const { return this->m_GloveItem; }
+    std::uint32_t GetBackItem() const { return this->m_BackItem; }
+    std::uint32_t GetStepsItem() const { return this->m_StepsItem; }
+    std::uint32_t GetCardItem() const { return this->m_CardItem; }
+    std::uint32_t GetSprayItem() const { return this->m_SprayItem; }
 
 private:
     std::uint32_t m_OwnerId;

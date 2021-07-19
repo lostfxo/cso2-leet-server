@@ -1,16 +1,18 @@
 #include "cso2/buymenu.hpp"
 
+#include <boost/json/value.hpp>
+
 #include "util/number.hpp"
 
 namespace cso2
 {
-BuyMenu::BuyMenu(const json::value& jv)
+BuyMenu::BuyMenu(const boost::json::value& jv)
 {
-    this->m_OwnerId = util::FastNarrow<std::uint32_t>(jv.at("owner_id").as_int64());
+    this->m_OwnerId =
+        util::FastNarrow<std::uint32_t>(jv.at("owner_id").as_int64());
 
-    auto arrayTransform = [](const json::value v) -> std::uint32_t {
-        return util::FastNarrow<std::uint32_t>(v.as_int64());
-    };
+    auto arrayTransform = [](const boost::json::value& v) -> std::uint32_t
+    { return util::FastNarrow<std::uint32_t>(v.as_int64()); };
 
     const auto& pistols = jv.at("pistols").as_array();
     std::transform(pistols.begin(), pistols.end(), this->m_Pistols.begin(),

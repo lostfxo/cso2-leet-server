@@ -2,61 +2,24 @@
 #define __CSO2_LOADOUT_H_
 
 #include "cso2/shared.hpp"
-
-#include <boost/json/value.hpp>
-
-namespace json = boost::json;
+#include "util/json_fwd.hpp"
 
 namespace cso2
 {
 class Loadout
 {
 public:
-    Loadout() = delete;
-    Loadout(const Loadout&) = delete;
-
-    explicit Loadout(const json::value& jv);
+    explicit Loadout(const boost::json::value& jv);
     ~Loadout() = default;
 
-    [[nodiscard]] std::uint32_t GetOwnerId() const noexcept
-    {
-        return this->m_OwnerId;
-    }
-
-    [[nodiscard]] std::uint8_t GetLoadoutNum() const noexcept
-    {
-        return this->m_LoadoutNum;
-    }
-
-    [[nodiscard]] std::uint32_t GetPrimaryWeapon() const noexcept
-    {
-        return this->m_PrimaryWeapon;
-    }
-
-    [[nodiscard]] std::uint32_t GetSecondaryWeapon() const noexcept
-    {
-        return this->m_SecondaryWeapon;
-    }
-
-    [[nodiscard]] std::uint32_t GetMelee() const noexcept
-    {
-        return this->m_Melee;
-    }
-
-    [[nodiscard]] std::uint32_t GetHeGrenade() const noexcept
-    {
-        return this->m_HeGrenade;
-    }
-
-    [[nodiscard]] std::uint32_t GetFlash() const noexcept
-    {
-        return this->m_Flash;
-    }
-
-    [[nodiscard]] std::uint32_t GetSmoke() const noexcept
-    {
-        return this->m_Smoke;
-    }
+    std::uint32_t GetOwnerId() const { return this->m_OwnerId; }
+    std::uint8_t GetLoadoutNum() const { return this->m_LoadoutNum; }
+    std::uint32_t GetPrimaryWeapon() const { return this->m_PrimaryWeapon; }
+    std::uint32_t GetSecondaryWeapon() const { return this->m_SecondaryWeapon; }
+    std::uint32_t GetMelee() const { return this->m_Melee; }
+    std::uint32_t GetHeGrenade() const { return this->m_HeGrenade; }
+    std::uint32_t GetFlash() const { return this->m_Flash; }
+    std::uint32_t GetSmoke() const { return this->m_Smoke; }
 
 private:
     // members are mem aligned

@@ -1,11 +1,13 @@
 #include "cso2/user.hpp"
 
-#include "util/number.hpp"
+#include <boost/json/value.hpp>
+
 #include "util/json_conv.hpp"
+#include "util/number.hpp"
 
 namespace cso2
 {
-User::User(const json::value& jv)
+User::User(const boost::json::value& jv)
 {
     this->m_Id = util::FastNarrow<std::uint32_t>(jv.at("id").as_int64());
     this->m_UserName = jv.at("username").as_string();
@@ -13,14 +15,17 @@ User::User(const json::value& jv)
 
     this->m_GameMaster = jv.at("gm").as_bool();
 
-    this->m_Points = util::FastNarrow<std::uint64_t>(jv.at("points").as_int64());
+    this->m_Points =
+        util::FastNarrow<std::uint64_t>(jv.at("points").as_int64());
     this->m_Cash = util::FastNarrow<std::uint32_t>(jv.at("cash").as_int64());
-    this->m_Mileage = util::FastNarrow<std::uint32_t>(jv.at("mpoints").as_int64());
+    this->m_Mileage =
+        util::FastNarrow<std::uint32_t>(jv.at("mpoints").as_int64());
 
     this->m_Level = util::FastNarrow<std::uint16_t>(jv.at("level").as_int64());
     this->m_CurXp = JStrToUint64(jv.at("cur_xp").as_string());
     this->m_MaxXp = JStrToUint64(jv.at("max_xp").as_string());
-    this->m_VipLevel = util::FastNarrow<std::uint8_t>(jv.at("vip_level").as_int64());
+    this->m_VipLevel =
+        util::FastNarrow<std::uint8_t>(jv.at("vip_level").as_int64());
     this->m_VipXp = util::FastNarrow<std::uint32_t>(jv.at("vip_xp").as_int64());
 
     this->m_Rank = util::FastNarrow<std::uint8_t>(jv.at("rank").as_int64());
@@ -34,16 +39,20 @@ User::User(const json::value& jv)
         util::FastNarrow<std::uint32_t>(jv.at("seconds_played").as_int64());
 
     this->m_Kills = util::FastNarrow<std::uint32_t>(jv.at("kills").as_int64());
-    this->m_Deaths = util::FastNarrow<std::uint32_t>(jv.at("deaths").as_int64());
-    this->m_Assists = util::FastNarrow<std::uint32_t>(jv.at("assists").as_int64());
+    this->m_Deaths =
+        util::FastNarrow<std::uint32_t>(jv.at("deaths").as_int64());
+    this->m_Assists =
+        util::FastNarrow<std::uint32_t>(jv.at("assists").as_int64());
     this->m_Headshots =
         util::FastNarrow<std::uint32_t>(jv.at("headshots").as_int64());
-    this->m_Accuracy = util::FastNarrow<std::uint16_t>(jv.at("accuracy").as_int64());
+    this->m_Accuracy =
+        util::FastNarrow<std::uint16_t>(jv.at("accuracy").as_int64());
 
     auto arrayConversion = [](const json::value v) -> int64_t
     { return v.as_int64(); };
 
-    this->m_Avatar = util::FastNarrow<std::uint16_t>(jv.at("avatar").as_int64());
+    this->m_Avatar =
+        util::FastNarrow<std::uint16_t>(jv.at("avatar").as_int64());
     const auto& unlockedAvatars = jv.at("unlocked_avatars").as_array();
     std::transform(unlockedAvatars.begin(), unlockedAvatars.end(),
                    this->m_UnlockedAvatars.begin(), arrayConversion);
@@ -77,7 +86,8 @@ User::User(const json::value& jv)
 
     this->m_BestGamemode =
         util::FastNarrow<std::uint32_t>(jv.at("best_gamemode").as_int64());
-    this->m_BestMap = util::FastNarrow<std::uint32_t>(jv.at("best_map").as_int64());
+    this->m_BestMap =
+        util::FastNarrow<std::uint32_t>(jv.at("best_map").as_int64());
 
     this->m_SkillHumanCurXp =
         JStrToUint64(jv.at("skill_human_curxp").as_string());

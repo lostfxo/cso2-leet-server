@@ -1,15 +1,9 @@
 #ifndef __CSO2_USER_H_
 #define __CSO2_USER_H_
 
-#include <string>
-#include <string_view>
-
-#include <boost/json/value.hpp>
-
 #include "cso2/definitions.hpp"
 #include "cso2/shared.hpp"
-
-namespace json = boost::json;
+#include "util/json_fwd.hpp"
 
 class UserService;
 
@@ -18,10 +12,7 @@ namespace cso2
 class User
 {
 public:
-    User() = delete;
-    User(const User&) = delete;
-
-    explicit User(const json::value& jv);
+    explicit User(const boost::json::value& jv);
     ~User() = default;
 
     inline bool operator==(const User& u) { return this->GetId() == u.GetId(); }

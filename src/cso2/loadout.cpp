@@ -1,12 +1,15 @@
 #include "cso2/loadout.hpp"
 
+#include <boost/json/value.hpp>
+
 #include "util/number.hpp"
 
 namespace cso2
 {
-Loadout::Loadout(const json::value& jv)
+Loadout::Loadout(const boost::json::value& jv)
 {
-    this->m_OwnerId = util::FastNarrow<std::uint32_t>(jv.at("owner_id").as_int64());
+    this->m_OwnerId =
+        util::FastNarrow<std::uint32_t>(jv.at("owner_id").as_int64());
 
     this->m_LoadoutNum =
         util::FastNarrow<std::uint8_t>(jv.at("loadout_num").as_int64());

@@ -2,31 +2,18 @@
 #define __CSO2_INVENTORY_H_
 
 #include "cso2/shared.hpp"
-
-#include <boost/json/value.hpp>
-
-namespace json = boost::json;
+#include "util/json_fwd.hpp"
 
 namespace cso2
 {
 class Inventory
 {
 public:
-    Inventory() = delete;
-    Inventory(const Inventory&) = delete;
-
-    explicit Inventory(const json::value& jv);
+    explicit Inventory(const boost::json::value& jv);
     ~Inventory() = default;
 
-    [[nodiscard]] std::uint32_t GetOwnerId() const noexcept
-    {
-        return this->m_OwnerId;
-    }
-
-    [[nodiscard]] const InventoryItemsArray& GetItems() const noexcept
-    {
-        return this->m_Items;
-    }
+    std::uint32_t GetOwnerId() const { return this->m_OwnerId; }
+    const InventoryItemsArray& GetItems() const { return this->m_Items; }
 
 private:
     std::uint32_t m_OwnerId;

@@ -207,6 +207,7 @@ set(LEET_HEADERS_BASE
     "src/util/binary.hpp"
     "src/util/fs.hpp"
     "src/util/json_conv.hpp"
+    "src/util/json_fwd.hpp"
     "src/util/log.hpp"
     "src/util/number.hpp"
     "src/util/randomstring.hpp"

@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string_view>
+#include <vector>
 
 using namespace std::string_view_literals;
 
@@ -155,6 +156,40 @@ enum class SlotStatus : std::uint8_t
     NotReady = 0,
     Ingame = 1,
     Ready = 2
+};
+
+struct ShopItemPayment
+{
+    std::uint32_t PreviousPrice;
+    std::uint32_t CurrentPrice;
+    std::uint32_t MileageReward;
+    std::uint16_t Quantity;
+    std::uint8_t DiscountPercentage;
+    std::uint8_t Flags;
+};
+
+enum class ShopItemCurrency : std::uint8_t
+{
+    Credits = 0,
+    Points = 0,
+    Mileage = 2
+};
+
+enum class ShopItemFlags : std::uint8_t
+{
+    Event = 0x1,
+    New = 0x2,
+    Hot = 0x4,
+    Unknown = 0x8,
+    Sale = 0x10,
+    Giftable = 0x20
+};
+
+struct ShopItem
+{
+    std::uint32_t ItemId;
+    ShopItemCurrency Currency;
+    std::vector<ShopItemPayment> PaymentOptions;
 };
 
 enum class TeamBalanceType : std::uint8_t
